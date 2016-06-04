@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.brandon14.checkbook">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AddEditAccount"
+            android:label="@string/title_add_account"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.brandon14.checkbook.MainActivity" />
+        </activity>
+        <activity
+            android:name=".AccountActivity"
+            android:label="@string/title_activity_account"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.brandon14.checkbook.MainActivity" />
+        </activity>
+        <activity
+            android:name=".AddEditTransaction"
+            android:label="@string/title_add_transaction"
+            android:parentActivityName=".AccountActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.brandon14.checkbook.AccountActivity" />
+        </activity>
+        <activity
+            android:name=".AddEditTransfer"
+            android:label="@string/title_add_transfer"
+            android:parentActivityName=".AccountActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.brandon14.checkbook.AccountActivity" />
+        </activity>
+    </application>
+
+</manifest>

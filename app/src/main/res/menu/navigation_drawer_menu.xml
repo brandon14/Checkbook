@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group
+        android:id="@+id/menu_navigation_app_group"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/navigation_menu_accounts"
+            android:checked="true"
+            android:orderInCategory="0"
+            android:icon="@drawable/ic_account_grey_24dp"
+            android:title="@string/title_accounts"/>
+        <item
+            android:id="@+id/navigation_menu_recurring"
+            android:checked="true"
+            android:orderInCategory="1"
+            android:icon="@drawable/ic_recurring_grey_24dp"
+            android:title="@string/title_recurring"/>
+        <item
+            android:id="@+id/navigation_menu_reports"
+            android:checked="true"
+            android:orderInCategory="2"
+            android:icon="@drawable/ic_reports_grey_24dp"
+            android:title="@string/title_reports"/>
+
+    </group>
+
+    <group
+        android:id="@+id/menu_navigation_backup_group"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/navigation_menu_backup"
+            android:checked="true"
+            android:orderInCategory="3"
+            android:icon="@drawable/ic_cloud_backup_grey_24dp"
+            android:title="@string/title_backup"/>
+
+        <item
+            android:id="@+id/navigation_menu_restore"
+            android:checked="true"
+            android:orderInCategory="4"
+            android:icon="@drawable/ic_cloud_restore_grey_24dp"
+            android:title="@string/title_restore"/>
+
+    </group>
+
+    <group
+        android:id="@+id/menu_navigation_misc_group"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/navigation_menu_settings"
+            android:checked="true"
+            android:orderInCategory="5"
+            android:icon="@drawable/ic_settings_grey_24dp"
+            android:title="@string/title_settings"/>
+        <item
+            android:id="@+id/navigation_menu_help"
+            android:checked="true"
+            android:orderInCategory="6"
+            android:icon="@drawable/ic_help_grey_24dp"
+            android:title="@string/title_help"/>
+        <item
+            android:id="@+id/navigation_menu_about"
+            android:checked="true"
+            android:orderInCategory="7"
+            android:icon="@drawable/ic_about_grey_24dp"
+            android:title="@string/title_about"/>
+
+    </group>
+
+</menu>

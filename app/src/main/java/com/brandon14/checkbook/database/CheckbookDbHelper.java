@@ -154,10 +154,8 @@ public class CheckbookDbHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getReadableDatabase();
 
-        String orderBy = CheckbookContract.CheckbookDb.getColumnNameAccountName() + " COLLATE NOCASE";
-
         Cursor cursor = db.query(CheckbookContract.CheckbookDb.getAccountTableName(),
-                null, null, null, null, null, orderBy);
+                null, null, null, null, null, null);
 
         if (cursor.getCount() == 0) {
             Log.w(LOG_TAG, "No accounts found in database!");

@@ -8,7 +8,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
@@ -30,13 +29,11 @@ public class MainActivity extends AppCompatActivity
         SettingsFragment.OnSettingsFragmentInteractionListener {
     private static final String LOG_TAG = "MainActivity";
 
-    private static final int ACCOUNTS_FRAGMENT_REQUEST = 1;
     private static final int BACK_PRESS_TIME = 2000;
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
     private Toolbar mToolbar;
-    private static Checkbook sCheckbook;
 
     private boolean mDoubleBackToExitPressedOnce = false;
     private CharSequence mTitle;
@@ -47,7 +44,7 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-        sCheckbook = new Checkbook(getApplicationContext());
+        new Checkbook(getApplicationContext());
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -64,8 +61,7 @@ public class MainActivity extends AppCompatActivity
                 fragmentManager.findFragmentById(R.id.navigation_drawer);
 
         // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
+        mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
@@ -219,7 +215,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     /**
      *
      */
@@ -232,8 +227,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
@@ -245,16 +238,8 @@ public class MainActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    public static Checkbook getCheckbook() {
-        return sCheckbook;
-    }
-
     @Override
     public void onSettingsFragmentInteraction(String id) {
 
-    }
-
-    public static int getAccountsFragmentRequest() {
-        return ACCOUNTS_FRAGMENT_REQUEST;
     }
 }

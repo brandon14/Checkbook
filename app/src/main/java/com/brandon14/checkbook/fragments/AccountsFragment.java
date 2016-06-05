@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -24,11 +25,12 @@ import android.widget.TextView;
 
 import com.brandon14.checkbook.AccountActivity;
 import com.brandon14.checkbook.database.Checkbook;
+import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
 import com.brandon14.checkbook.objects.Account;
 import com.brandon14.checkbook.adapters.AccountAdapter;
 import com.brandon14.checkbook.AddEditAccount;
-import com.brandon14.checkbook.MainActivity;
 import com.brandon14.checkbook.R;
+import com.brandon14.checkbook.requests.FragmentRequests;
 import com.brandon14.checkbook.resultcodes.AccountResultCodes;
 import com.brandon14.checkbook.widgets.ContextMenuRecyclerView;
 
@@ -40,15 +42,11 @@ import java.text.DecimalFormat;
  * Use the {@link AccountsFragment#getInstance} factory method to
  * create an instance of this fragment.
  */
-public class AccountsFragment extends Fragment implements AccountAdapter.AccountAdapterCallbacks, Checkbook.CheckbookAccountCallbacks {
+public class AccountsFragment extends Fragment {
     /**
      *
      */
     private static final String LOG_TAG = "AccountsFragment";
-    private static final String ARG_IS_EDIT = "arg_is_edit";
-    private static final String ARG_ACCOUNT_ID = "arg_account_id";
-    private static final String ARG_ACCOUNT_TITLE = "arg_account_title";
-    private static final String ARG_ACCOUNT_POSITION = "arg_account_position";
     private static final String RECYCLER_VIEW_STATE_KEY = "recycler_view_state";
 
     private static AccountsFragment sFragmentInstance;
@@ -105,8 +103,6 @@ public class AccountsFragment extends Fragment implements AccountAdapter.Account
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_accounts, container, false);
 
-        MainActivity.getCheckbook().setAccountCallback(this);
-
         mTotalBalanceTextView = (TextView) rootView
                 .findViewById(R.id.text_view_total_balance);
         mTotalBalanceView = (AppBarLayout) rootView.findViewById(R.id.total_balance_app_bar);
@@ -121,19 +117,14 @@ public class AccountsFragment extends Fragment implements AccountAdapter.Account
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), AddEditAccount.class);
-                intent.putExtra(ARG_IS_EDIT, false);
+                intent.putExtra(AccountIntentKeys.ARG_IS_EDIT, false);
 
-                startActivityForResult(intent, MainActivity.getAccountsFragmentRequest());
+                startActivityForResult(intent, FragmentRequests.ACCOUNT_FRAGMENT_REQUEST);
             }
         });
 
-        mTotalBalance = getTotalBalance();
-
-        if (mTotalBalance.compareTo(BigDecimal.ZERO) < 0) {
-            mTotalBalanceTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.negative_red));
-        }
-
-        mTotalBalanceTextView.setText(DecimalFormat.getCurrencyInstance().format(mTotalBalance.doubleValue()));
+        refreshAccountMessage();
+        refreshTotalBalanceView();
 
         // Inflate the layout for this fragment
         return rootView;
@@ -192,15 +183,16 @@ public class AccountsFragment extends Fragment implements AccountAdapter.Account
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which){
                             case DialogInterface.BUTTON_POSITIVE:
-                                if (!MainActivity.getCheckbook().deleteAccount(selectedAccount.getAccountId(), info.position)) {
-                                    mAccountAdapter.removeAccount(info.position);
-
+                                if (!Checkbook.getInstance().deleteAccount(selectedAccount.getAccountId())) {
                                     Snackbar snackbar = Snackbar.make(getActivity().findViewById(R.id.accounts_fragment_coordinator),
                                             getResources().getString(R.string.str_error_deleting_account), Snackbar.LENGTH_LONG);
                                     snackbar.show();
-                                }
+                                } else {
+                                    mAccountAdapter.removeAccount(info.position);
 
-                                //refreshAccountList();
+                                    refreshAccountMessage();
+                                    refreshTotalBalanceView();
+                                }
 
                                 break;
 
@@ -219,12 +211,12 @@ public class AccountsFragment extends Fragment implements AccountAdapter.Account
             case R.id.account_list_edit:
 
                 Intent intent = new Intent(getActivity(), AddEditAccount.class);
-                intent.putExtra(ARG_IS_EDIT, true);
-                intent.putExtra(ARG_ACCOUNT_TITLE, selectedAccount.getAccountName());
-                intent.putExtra(ARG_ACCOUNT_ID, selectedAccount.getAccountId());
-                intent.putExtra(ARG_ACCOUNT_POSITION, info.position);
+                intent.putExtra(AccountIntentKeys.ARG_IS_EDIT, true);
+                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_TITLE, selectedAccount.getAccountName());
+                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_ID, selectedAccount.getAccountId());
+                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, info.position);
 
-                startActivityForResult(intent, MainActivity.getAccountsFragmentRequest());
+                startActivityForResult(intent, FragmentRequests.ACCOUNT_FRAGMENT_REQUEST);
 
                 return true;
             default:
@@ -237,10 +229,22 @@ public class AccountsFragment extends Fragment implements AccountAdapter.Account
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == AccountResultCodes.ACCOUNT_CREATED) {
+            Account account = (Account) data.getSerializableExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT);
 
+            mAccountAdapter.addAccount(account);
+        } else if (resultCode == AccountResultCodes.ACCOUNT_UPDATED) {
+            Account account = (Account) data.getSerializableExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT);
+            int position = data.getIntExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, -1);
+
+            mAccountAdapter.updateAccount(account, position);
+        } else if (resultCode == AccountResultCodes.ACCOUNT_DELETED) {
+            int position = data.getIntExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, -1);
+
+            mAccountAdapter.removeAccount(position);
         }
 
-        //refreshAccountList();
+        refreshAccountMessage();
+        refreshTotalBalanceView();
     }
 
     private void setUpRecyclerView() {
@@ -250,15 +254,37 @@ public class AccountsFragment extends Fragment implements AccountAdapter.Account
         registerForContextMenu(mAccountsRecyclerView);
 
         mAccountAdapter = new AccountAdapter(getActivity(),
-                MainActivity.getCheckbook().getAccountEntries());
-        mAccountAdapter.setCallback(this);
+                Checkbook.getInstance().getAccountEntries());
+        mAccountAdapter.SetOnViewClickListener(new AccountAdapter.OnViewClickListener() {
+            @Override
+            public void onViewClick(View v, int position) {
+                final Account account = mAccountAdapter.getItem(position);
 
-        showHideAddAccountMessage();
+                Intent intent = new Intent(getActivity(), AccountActivity.class);
+                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_TITLE, account.getAccountName());
+                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_ID, account.getAccountId());
+                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, position);
+
+                startActivityForResult(intent, FragmentRequests.ACCOUNT_FRAGMENT_REQUEST);
+            }
+        });
+
+        refreshAccountMessage();
 
         mAccountsRecyclerView.setAdapter(mAccountAdapter);
     }
 
-    private void showHideAddAccountMessage() {
+    private void refreshTotalBalanceView() {
+        mTotalBalance = mAccountAdapter.getAccountsBalance();
+
+        if (mTotalBalance.compareTo(BigDecimal.ZERO) < 0) {
+            mTotalBalanceTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.negative_red));
+        }
+
+        mTotalBalanceTextView.setText(DecimalFormat.getCurrencyInstance().format(mTotalBalance.doubleValue()));
+    }
+
+    private void refreshAccountMessage() {
         if (mAccountAdapter.getItemCount() == 0) {
             mTotalBalanceView.setVisibility(View.GONE);
             mAccountsRecyclerView.setVisibility(View.GONE);
@@ -268,52 +294,5 @@ public class AccountsFragment extends Fragment implements AccountAdapter.Account
             mAccountsRecyclerView.setVisibility(View.VISIBLE);
             mAddAccountMessage.setVisibility(View.GONE);
         }
-    }
-
-    private void refreshAccountList() {
-        if (mAccountAdapter == null) {
-            mAccountAdapter = new AccountAdapter(getActivity(),
-                    MainActivity.getCheckbook().getAccountEntries());
-            mAccountAdapter.setCallback(this);
-        } else {
-            mAccountAdapter.setAccountEntries(MainActivity.getCheckbook().getAccountEntries());
-        }
-
-        if (mAccountsRecyclerView != null) {
-            mAccountsRecyclerView.setAdapter(mAccountAdapter);
-        }
-
-        showHideAddAccountMessage();
-    }
-
-    public void addAccount() {
-
-    }
-
-    public void deleteAccount(int accountId) {
-    }
-
-    @Override
-    public void launchAccountActivity(Account account, int position) {
-        Intent intent = new Intent(getActivity(), AccountActivity.class);
-        intent.putExtra(ARG_ACCOUNT_TITLE, account.getAccountName());
-        intent.putExtra(ARG_ACCOUNT_ID, account.getAccountId());
-        intent.putExtra(ARG_ACCOUNT_POSITION, position);
-
-        startActivityForResult(intent, MainActivity.getAccountsFragmentRequest());
-    }
-
-    private BigDecimal getTotalBalance() {
-        return MainActivity.getCheckbook().getTotalAccountsBalance();
-    }
-
-    @Override
-    public void accountUpdated(int position) {
-        //mAccountAdapter.notifyItemChanged(position);
-    }
-
-    @Override
-    public void accountDeleted(int position) {
-        //mAccountAdapter.notifyItemRemoved(position);
     }
 }

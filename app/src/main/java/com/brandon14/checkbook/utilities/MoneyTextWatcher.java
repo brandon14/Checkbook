@@ -11,6 +11,15 @@ import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 
+/**
+ *
+ * Created by brandon on 5/18/16.
+ *
+ * Paritally taken from ToddH's answer on stackoverflow here:
+ * http://stackoverflow.com/questions/5107901/better-way-to-format-currency-input-edittext
+ * I modified it to only display the numbers without the currency symbol, and also to allow for deletion of the
+ * text instead of always staying at 0.00.
+ */
 public class MoneyTextWatcher implements TextWatcher {
     private final WeakReference<EditText> mEditTextWeakReference;
 

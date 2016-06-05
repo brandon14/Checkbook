@@ -93,7 +93,7 @@ public class CheckbookDbHelper extends SQLiteOpenHelper {
     }
 
     // Account functions
-    public boolean addAccount(String accountName, BigDecimal accountBalance, Date date) {
+    public long addAccount(String accountName, BigDecimal accountBalance, Date date) {
 
         SQLiteDatabase db = getWritableDatabase();
 
@@ -115,15 +115,15 @@ public class CheckbookDbHelper extends SQLiteOpenHelper {
 
             db.close();
 
-            return false;
+            return newRowId;
         }
 
         db.close();
 
-        return true;
+        return newRowId;
     }
 
-    public boolean updateAccount(int accountId, String accountName, BigDecimal accountBalance, Date date) {
+    public boolean updateAccount(long accountId, String accountName, BigDecimal accountBalance, Date date) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -133,7 +133,7 @@ public class CheckbookDbHelper extends SQLiteOpenHelper {
         values.put(CheckbookContract.CheckbookDb.getColumnNameDateCreated(), new SimpleDateFormat(DATABASE_DATE_FORMAT, mContext.getResources().getConfiguration().locale).format(date));
 
         String whereClause = CheckbookContract.CheckbookDb.getColumnNameAccountId() + " = ?";
-        String[] whereArgs = new String[] { Integer.toString(accountId) };
+        String[] whereArgs = new String[] { Long.toString(accountId) };
 
         int rowsAffected = db.update(CheckbookContract.CheckbookDb.getAccountTableName(), values, whereClause, whereArgs);
 
@@ -180,7 +180,7 @@ public class CheckbookDbHelper extends SQLiteOpenHelper {
                 .getColumnNameDateCreated());
 
         while (true) {
-            int id = cursor.getInt(idIndex);
+            long id = cursor.getLong(idIndex);
             String name = cursor.getString(nameIndex);
             BigDecimal startBalance = BigDecimal.valueOf(cursor.getDouble(startBalanceIndex));
             BigDecimal availBalance = BigDecimal.valueOf(cursor.getDouble(availBalanceIndex));
@@ -202,13 +202,13 @@ public class CheckbookDbHelper extends SQLiteOpenHelper {
         return accountList;
     }
 
-    public Account getAccount(int accountId) {
+    public Account getAccount(long accountId) {
         Account account;
 
         SQLiteDatabase db = getReadableDatabase();
 
         String selectionClause = CheckbookContract.CheckbookDb.getColumnNameAccountId() + " = ?";
-        String selectionArgs[] = new String[] { Integer.toString(accountId) };
+        String selectionArgs[] = new String[] { Long.toString(accountId) };
 
         Cursor cursor = db.query(CheckbookContract.CheckbookDb.getAccountTableName(), null, selectionClause, selectionArgs, null, null, null);
 
@@ -232,7 +232,7 @@ public class CheckbookDbHelper extends SQLiteOpenHelper {
         int dateIndex = cursor.getColumnIndex(CheckbookContract.CheckbookDb
                 .getColumnNameDateCreated());
 
-        int id = cursor.getInt(idIndex);
+        long id = cursor.getLong(idIndex);
         String name = cursor.getString(nameIndex);
         BigDecimal startBalance = BigDecimal.valueOf(cursor.getDouble(startBalanceIndex));
         BigDecimal availBalance = BigDecimal.valueOf(cursor.getDouble(availBalanceIndex));
@@ -247,12 +247,12 @@ public class CheckbookDbHelper extends SQLiteOpenHelper {
         return account;
     }
 
-    public boolean deleteAccount(int accountId) {
+    public boolean deleteAccount(long accountId) {
 
         SQLiteDatabase db = getWritableDatabase();
 
         String whereClause = CheckbookContract.CheckbookDb.getColumnNameAccountId() + " = ?";
-        String[] whereArgs = new String[] { Integer.toString(accountId) };
+        String[] whereArgs = new String[] { Long.toString(accountId) };
 
         int rowsAffected = db.delete(CheckbookContract.CheckbookDb.getAccountTableName(), whereClause, whereArgs);
 

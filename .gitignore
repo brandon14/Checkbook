@@ -1,6 +1,17 @@
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
 .DS_Store
-/build
+
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+local.properties
+build/
+.gradle/
+.idea
+*.iml

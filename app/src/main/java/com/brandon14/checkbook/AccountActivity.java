@@ -9,12 +9,17 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.brandon14.checkbook.adapters.TransactionAdapter;
+import com.brandon14.checkbook.database.Checkbook;
+import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
 import com.brandon14.checkbook.objects.Account;
+import com.brandon14.checkbook.requests.ActivityRequests;
+import com.brandon14.checkbook.requests.FragmentRequests;
 import com.brandon14.checkbook.resultcodes.AccountResultCodes;
 
 import java.text.DecimalFormat;
@@ -35,7 +40,7 @@ public class AccountActivity extends AppCompatActivity {
     /**
      *
      */
-    private int mAccountId;
+    private long mAccountId;
     private String mAccountName;
     private int mAccountPosition;
     private CharSequence mTitle;
@@ -48,13 +53,13 @@ public class AccountActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        mAccountId = intent.getIntExtra(ARG_ACCOUNT_ID, -1);
+        mAccountId = intent.getLongExtra(ARG_ACCOUNT_ID, -1);
         mAccountName = intent.getStringExtra(ARG_ACCOUNT_TITLE);
         mAccountPosition = intent.getIntExtra(ARG_ACCOUNT_POSITION, -1);
 
         mTitle = mAccountName;
 
-        mAccount = MainActivity.getCheckbook().getAccount(mAccountId);
+        mAccount = Checkbook.getInstance().getAccount(mAccountId);
 
         setContentView(R.layout.activity_account);
 
@@ -106,20 +111,22 @@ public class AccountActivity extends AppCompatActivity {
             intent.putExtra(ARG_IS_EDIT, true);
             intent.putExtra(ARG_ACCOUNT_ID, mAccount.getAccountId());
 
-            startActivityForResult(intent, MainActivity.getAccountsFragmentRequest());
+            startActivityForResult(intent, ActivityRequests.ACCOUNT_REQUEST);
         } else if (id == R.id.action_account_delete) {
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            if (!MainActivity.getCheckbook().deleteAccount(mAccount.getAccountId(), mAccountPosition)) {
+                            if (!Checkbook.getInstance().deleteAccount(mAccount.getAccountId())) {
                                 Snackbar snackbar = Snackbar.make(findViewById(R.id.accounts_fragment_coordinator),
                                         getResources().getString(R.string.str_error_deleting_account), Snackbar.LENGTH_LONG);
                                 snackbar.show();
                             }
 
-                            setResult(AccountResultCodes.ACCOUNT_DELETED);
+                            Intent intent = getIntent().putExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, mAccountPosition);
+
+                            setResult(AccountResultCodes.ACCOUNT_DELETED, intent);
                             finish();
 
                             break;
@@ -143,7 +150,7 @@ public class AccountActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        mAccount = MainActivity.getCheckbook().getAccount(mAccountId);
+        mAccount = Checkbook.getInstance().getAccount(mAccountId);
         mAccountName = mAccount.getAccountName();
 
         mTitle = mAccountName;

@@ -1,7 +1,9 @@
 package com.brandon14.checkbook.objects;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -10,10 +12,10 @@ import java.util.Date;
 /**
  * Created by Brandon Clothier on 1/29/15.
  */
-public class Account {
+public class Account implements Comparable<Account>, Serializable {
     private static final String LOG_TAG = "Accounts";
 
-    private int mAccountId;
+    private long mAccountId;
 
     private BigDecimal mStartingBalance;
     private BigDecimal mCurrentBalance;
@@ -31,7 +33,7 @@ public class Account {
         this.mClearedBalance = BigDecimal.ZERO;
     }
 
-    public Account(int id, String name, BigDecimal startingBalance) {
+    public Account(long id, String name, BigDecimal startingBalance) {
         this.mAccountId = id;
         this.mAccountName = name;
         this.mStartingBalance = startingBalance;
@@ -39,7 +41,7 @@ public class Account {
         this.mClearedBalance = startingBalance;
     }
 
-    public Account(int id, String name, BigDecimal startingBalance, Date date) {
+    public Account(long id, String name, BigDecimal startingBalance, Date date) {
         this.mAccountId = id;
         this.mAccountName = name;
         this.mStartingBalance = startingBalance;
@@ -48,7 +50,7 @@ public class Account {
         this.mAccountDateCreated = date;
     }
 
-    public Account(int id, String name, BigDecimal startingBalance, BigDecimal currentBalance,
+    public Account(long id, String name, BigDecimal startingBalance, BigDecimal currentBalance,
                    BigDecimal clearedBalance, Date date) {
         this.mAccountId = id;
         this.mAccountName = name;
@@ -58,7 +60,7 @@ public class Account {
         this.mAccountDateCreated = date;
     }
 
-    public int getAccountId() {
+    public long getAccountId() {
         return mAccountId;
     }
 
@@ -131,5 +133,11 @@ public class Account {
 
     public void setTransactionEntries(ArrayList<Transaction> mTransactionEntries) {
         this.mTransactionEntries = mTransactionEntries;
+    }
+
+    // Sort by account name lexographically.
+    @Override
+    public int compareTo(@NonNull Account another) {
+        return this.mAccountName.compareToIgnoreCase(another.getAccountName());
     }
 }

@@ -11,11 +11,11 @@ import android.widget.TextView;
 
 import com.brandon14.checkbook.objects.Account;
 import com.brandon14.checkbook.R;
-import com.brandon14.checkbook.utilities.RippleForegroundListener;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by brandon on 2/13/15.
@@ -23,83 +23,27 @@ import java.util.ArrayList;
 public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder> {
     private static final String LOG_TAG = "AccountAdapter";
 
-    private ArrayList<Account> mAccountEntries;
-    private AccountAdapterCallbacks mCallbacks;
+    private ArrayList<Account> mAccountList;
     private Context mContext;
-    private LayoutInflater mInflater;
+
+    private OnViewClickListener mViewClickListener;
 
     public AccountAdapter(Context context, ArrayList<Account> entries) {
         mContext = context;
-        mAccountEntries = entries;
-        mInflater = LayoutInflater.from(context);
-    }
-
-    public void setCallback(AccountAdapterCallbacks callbacks) {
-        this.mCallbacks = callbacks;
-    }
-
-    public void setAccountEntries(ArrayList<Account> entries) {
-        mAccountEntries = entries;
-
-        this.notifyDataSetChanged();
-    }
-
-    public void addAccount(Account account) {
-        mAccountEntries.add(account);
-
-        this.notifyDataSetChanged();
-    }
-
-    public void removeAccount(int position) {
-        mAccountEntries.remove(position);
-
-        this.notifyItemRemoved(position);
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
-        private TextView mAccountNameView;
-        private TextView mAccountBalanceView;
-        private View mView;
-
-        public ViewHolder(View v) {
-            super(v);
-
-            mAccountNameView = (TextView) v.findViewById(R.id.textview_account_recyclerview_account_name);
-            mAccountBalanceView = (TextView) v.findViewById(R.id.textview_account_recyclerview_account_balance);
-            mView = v;
-
-            v.setOnLongClickListener(this);
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            return v.showContextMenu();
-        }
+        mAccountList = entries;
     }
 
     @Override
     public AccountAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = mInflater.inflate(R.layout.account_recyclerview_layout, parent, false);
+        final LayoutInflater mInflater = LayoutInflater.from(mContext);
+        final View v = mInflater.inflate(R.layout.account_recyclerview_layout, parent, false);
 
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        final int viewPosition = viewHolder.getAdapterPosition();
-        final Account account = mAccountEntries.get(position);
-
-        viewHolder.mView.setOnTouchListener(new RippleForegroundListener(R.id.account_recyclerview_cardview));
-        viewHolder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCallbacks != null) {
-                    mCallbacks.launchAccountActivity(account, viewPosition);
-                } else {
-                    Log.e(LOG_TAG, "Must set up callback interface!");
-                }
-            }
-        });
+        final Account account = mAccountList.get(position);
 
         String accountName = account.getAccountName();
         BigDecimal accountBalance = account.getCurrentBalance();
@@ -123,14 +67,99 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
      */
     @Override
     public int getItemCount() {
-        return mAccountEntries.size();
+        return mAccountList.size();
     }
 
+    // Account methods
     public Account getItem(int position) {
-        return mAccountEntries.get(position);
+        return mAccountList.get(position);
     }
 
-    public interface AccountAdapterCallbacks {
-        void launchAccountActivity(Account account, int position);
+    public void setAccountEntries(ArrayList<Account> entries) {
+        mAccountList = entries;
+
+        this.notifyDataSetChanged();
+    }
+
+    public void addAccount(Account account) {
+        mAccountList.add(account);
+
+        Collections.sort(mAccountList);
+
+        int position = mAccountList.indexOf(account);
+
+        this.notifyItemInserted(position);
+    }
+
+    public void removeAccount(int position) {
+        mAccountList.remove(position);
+
+        this.notifyItemRemoved(position);
+    }
+
+    public void removeAccount(Account account) {
+        int position = mAccountList.indexOf(account);
+        mAccountList.remove(position);
+
+        this.notifyItemRemoved(position);
+    }
+
+    public void updateAccount(Account account, int position) {
+        removeAccount(position);
+        addAccount(account);
+    }
+
+    public BigDecimal getAccountsBalance() {
+        BigDecimal accountsBalance = BigDecimal.ZERO;
+
+        if (mAccountList != null) {
+            for (int i = 0; i < mAccountList.size(); i++) {
+                try {
+                    accountsBalance = accountsBalance.add(mAccountList.get(i).getCurrentBalance());
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return accountsBalance;
+    }
+
+    // Viewholder
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
+        private TextView mAccountNameView;
+        private TextView mAccountBalanceView;
+
+        public ViewHolder(View v) {
+            super(v);
+
+            mAccountNameView = (TextView) v.findViewById(R.id.textview_account_recyclerview_account_name);
+            mAccountBalanceView = (TextView) v.findViewById(R.id.textview_account_recyclerview_account_balance);
+
+            v.setOnLongClickListener(this);
+            v.setOnClickListener(this);
+            //v.setOnTouchListener(new RippleForegroundListener(R.id.account_recyclerview_cardview));
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            return v.showContextMenu();
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (mViewClickListener != null) {
+                mViewClickListener.onViewClick(v, getAdapterPosition());
+            }
+        }
+    }
+
+    // Inteferace
+    public void SetOnViewClickListener(final OnViewClickListener mViewClickListener) {
+        this.mViewClickListener = mViewClickListener;
+    }
+
+    public interface OnViewClickListener {
+        void onViewClick(View v, int position);
     }
 }

@@ -9,6 +9,9 @@ import android.view.View;
 
 /**
  * Created by brandon on 5/28/16.
+ * Partially taken from josh2112 and Renaud Cerrato's answer on stackoverflow here:
+ * http://stackoverflow.com/questions/26466877/how-to-create-context-menu-for-recyclerview.
+ * I updated it to use getChildAdapterPosition since getPosition is depreciated.
  */
 public class ContextMenuRecyclerView extends RecyclerView {
     private RecyclerViewContextMenuInfo mContextMenuInfo;

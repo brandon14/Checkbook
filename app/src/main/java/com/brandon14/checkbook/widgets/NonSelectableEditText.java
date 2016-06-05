@@ -1,6 +1,5 @@
 package com.brandon14.checkbook.widgets;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.support.design.widget.TextInputEditText;
 import android.util.AttributeSet;
@@ -10,6 +9,8 @@ import android.view.MenuItem;
 
 /**
  * Created by brandon on 5/20/16.
+ * Taken partially from CJBS's solution found here on stackoverflow:
+ * http://stackoverflow.com/questions/27869983/edittext-disable-paste-replace-menu-pop-up-on-text-selection-handler-click-even/30490027#30490027
  */
 public class NonSelectableEditText extends TextInputEditText {
     public NonSelectableEditText(Context context) {
@@ -45,8 +46,7 @@ public class NonSelectableEditText extends TextInputEditText {
         super.onSelectionChanged(start, end);
     }
 
-    private void init()
-    {
+    private void init() {
         this.setCustomSelectionActionModeCallback(new ActionModeCallbackInterceptor());
         this.setLongClickable(false);
     }
@@ -56,20 +56,16 @@ public class NonSelectableEditText extends TextInputEditText {
      * Prevents the action bar (top horizontal bar with cut, copy, paste, etc.) from appearing
      * by intercepting the callback that would cause it to be created, and returning false.
      */
-    private class ActionModeCallbackInterceptor implements ActionMode.Callback
-    {
+    private class ActionModeCallbackInterceptor implements ActionMode.Callback {
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             return false;
         }
-
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             return false;
         }
-
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             return false;
         }
-
         public void onDestroyActionMode(ActionMode mode) {
 
         }

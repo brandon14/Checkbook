@@ -18,7 +18,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 
 import com.brandon14.checkbook.database.Checkbook;
-import com.brandon14.checkbook.fragments.AccountsFragment;
+import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
 import com.brandon14.checkbook.objects.Account;
 import com.brandon14.checkbook.resultcodes.AccountResultCodes;
 import com.brandon14.checkbook.utilities.MoneyTextWatcher;
@@ -39,9 +39,6 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
      *
      */
     private static final String LOG_TAG = "AddEditAccount";
-    private static final String ARG_IS_EDIT = "arg_is_edit";
-    private static final String ARG_ACCOUNT_ID = "arg_account_id";
-    private static final String ARG_ACCOUNT_POSITION = "arg_account_position";
 
     private TextInputEditText mAccountNameEditText;
     private NonSelectableEditText mAccountBalanceEditText;
@@ -67,9 +64,9 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        mIsEdit = intent.getBooleanExtra(ARG_IS_EDIT, false);
-        int accountId = intent.getIntExtra(ARG_ACCOUNT_ID, -1);
-        mAccountPosition = intent.getIntExtra(ARG_ACCOUNT_POSITION, -1);
+        mIsEdit = intent.getBooleanExtra(AccountIntentKeys.ARG_IS_EDIT, false);
+        long accountId = intent.getLongExtra(AccountIntentKeys.ARG_ACCOUNT_ID, -1);
+        mAccountPosition = intent.getIntExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, -1);
 
         if (mIsEdit) {
             mTitle = getString(R.string.title_edit_account);
@@ -102,7 +99,7 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
         SimpleDateFormat dateFormat = new SimpleDateFormat(Checkbook.getDatabaseShortDateFormat(), getResources().getConfiguration().locale);
 
         if (mIsEdit) {
-            mAccount = MainActivity.getCheckbook().getAccount(accountId);
+            mAccount = Checkbook.getInstance().getAccount(accountId);
             mAccountNameEditText.setText(mAccount.getAccountName());
             mAccountBalanceEditText.setText(DecimalFormat.getCurrencyInstance().format(mAccount.getStartingBalance().doubleValue()));
             mAccountDate = mAccount.getAccountDateCreated();
@@ -149,20 +146,25 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
         int id = item.getItemId();
 
         if (id == R.id.action_add_edit_account_save) {
-            boolean isCreated;
-
             if (mIsEdit) {
-                isCreated = updateAccount();
+                boolean isUpdated = updateAccount();
 
-                if (isCreated) {
-                    this.setResult(AccountResultCodes.ACCOUNT_UPDATED);
+                if (isUpdated) {
+                    // Add results to mAdapter in Fragment Class
+                    Intent intent = getIntent().putExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT, mAccount);
+                    intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, mAccountPosition);
+
+                    this.setResult(AccountResultCodes.ACCOUNT_UPDATED, intent);
                     this.finish();
                 }
             } else {
-                isCreated = createAccount();
+                Account account = createAccount();
 
-                if (isCreated) {
-                    this.setResult(AccountResultCodes.ACCOUNT_CREATED);
+                if (account != null) {
+                    // Add results to mAdapter in Fragment Class.
+                    Intent intent = getIntent().putExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT, account);
+                    
+                    this.setResult(AccountResultCodes.ACCOUNT_CREATED, intent);
                     this.finish();
                 }
             }
@@ -178,9 +180,9 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
         cancel();
     }
 
-    private boolean createAccount() {
+    private Account createAccount() {
         if (!checkNameTextbox()) {
-            return false;
+            return null;
         }
 
         BigDecimal accountBalance;
@@ -199,7 +201,13 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
 
         String accountName = mAccountNameEditText.getEditableText().toString();
 
-        return MainActivity.getCheckbook().addAccount(accountName, accountBalance, mAccountDate);
+        long accountId = Checkbook.getInstance().addAccount(accountName, accountBalance, mAccountDate);
+
+        if (accountId != -1) {
+            return new Account(accountId, accountName, accountBalance, mAccountDate);
+        }
+
+        return null;
     }
 
     private boolean updateAccount() {
@@ -223,9 +231,11 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
 
         String accountName = mAccountNameEditText.getEditableText().toString();
 
-        // Need to recalculate the account balances (cleared and available) after an update on starting balance
-        return MainActivity.getCheckbook().updateAccount(mAccount.getAccountId(), accountName, accountBalance,
-                mAccountDate, mAccountPosition);
+        mAccount.setAccountName(accountName);
+        mAccount.setStartingBalance(accountBalance);
+
+        return Checkbook.getInstance().updateAccount(mAccount.getAccountId(), accountName, accountBalance,
+                mAccountDate);
     }
 
     private boolean checkNameTextbox() {

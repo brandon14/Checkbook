@@ -138,7 +138,6 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
 
             v.setOnLongClickListener(this);
             v.setOnClickListener(this);
-            //v.setOnTouchListener(new RippleForegroundListener(R.id.account_recyclerview_cardview));
         }
 
         @Override

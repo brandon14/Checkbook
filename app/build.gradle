@@ -29,11 +29,15 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    // Google support libraries
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:support-v4:23.4.0'
     compile 'com.android.support:design:23.4.0'
     compile 'com.android.support:cardview-v7:23.4.0'
     compile 'com.android.support:recyclerview-v7:23.4.0'
-    compile 'com.github.PhilJay:MPAndroidChart:v2.2.4'
-    compile 'de.hdodenhof:circleimageview:1.3.0'
+
+    // Misc libraries.
+    //compile 'com.github.PhilJay:MPAndroidChart:v2.2.4'
+    //compile 'de.hdodenhof:circleimageview:1.3.0'
 }

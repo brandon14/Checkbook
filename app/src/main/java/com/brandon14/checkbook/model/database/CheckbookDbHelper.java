@@ -1,4 +1,4 @@
-package com.brandon14.checkbook.database;
+package com.brandon14.checkbook.model.database;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.util.Log;
 
-import com.brandon14.checkbook.objects.Account;
+import com.brandon14.checkbook.model.Account;
 
 import java.math.BigDecimal;
 import java.text.ParsePosition;

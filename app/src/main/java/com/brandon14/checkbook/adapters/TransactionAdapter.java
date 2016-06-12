@@ -8,11 +8,10 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.brandon14.checkbook.R;
-import com.brandon14.checkbook.objects.Transaction;
-import com.brandon14.checkbook.database.Checkbook;
+import com.brandon14.checkbook.model.Transaction;
+import com.brandon14.checkbook.model.database.Checkbook;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

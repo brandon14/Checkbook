@@ -1,9 +1,10 @@
-package com.brandon14.checkbook.objects;
+package com.brandon14.checkbook.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.Date;
 /**
  * Created by Brandon Clothier on 1/29/15.
  */
-public class Account implements Comparable<Account>, Serializable {
+public class Account implements Comparable<Account>, Parcelable {
     private static final String LOG_TAG = "Accounts";
 
     private long mAccountId;
@@ -25,22 +26,6 @@ public class Account implements Comparable<Account>, Serializable {
 
     private ArrayList<Transaction> mTransactionEntries;
 
-    public Account(int id, String name) {
-        this.mAccountId = id;
-        this.mAccountName = name;
-        this.mStartingBalance = BigDecimal.ZERO;
-        this.mCurrentBalance = BigDecimal.ZERO;
-        this.mClearedBalance = BigDecimal.ZERO;
-    }
-
-    public Account(long id, String name, BigDecimal startingBalance) {
-        this.mAccountId = id;
-        this.mAccountName = name;
-        this.mStartingBalance = startingBalance;
-        this.mCurrentBalance = startingBalance;
-        this.mClearedBalance = startingBalance;
-    }
-
     public Account(long id, String name, BigDecimal startingBalance, Date date) {
         this.mAccountId = id;
         this.mAccountName = name;
@@ -48,6 +33,7 @@ public class Account implements Comparable<Account>, Serializable {
         this.mCurrentBalance = startingBalance;
         this.mClearedBalance = startingBalance;
         this.mAccountDateCreated = date;
+        this.mTransactionEntries = new ArrayList<>();
     }
 
     public Account(long id, String name, BigDecimal startingBalance, BigDecimal currentBalance,
@@ -58,6 +44,7 @@ public class Account implements Comparable<Account>, Serializable {
         this.mCurrentBalance = currentBalance;
         this.mClearedBalance = clearedBalance;
         this.mAccountDateCreated = date;
+        this.mTransactionEntries = new ArrayList<>();
     }
 
     public long getAccountId() {
@@ -139,5 +126,45 @@ public class Account implements Comparable<Account>, Serializable {
     @Override
     public int compareTo(@NonNull Account another) {
         return this.mAccountName.compareToIgnoreCase(another.getAccountName());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mAccountId);
+        dest.writeString(mStartingBalance.toString());
+        dest.writeString(mCurrentBalance.toString());
+        dest.writeString(mClearedBalance.toString());
+        dest.writeString(mAccountName);
+        dest.writeLong(mAccountDateCreated.getTime());
+        dest.writeTypedList(mTransactionEntries);
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+
+        @Override
+        public Account createFromParcel(Parcel source) {
+            return new Account(source);
+        }
+
+        @Override
+        public Account[] newArray(int size) {
+            return new Account[size];
+        }
+    };
+
+    private Account(Parcel in) {
+        mAccountId = in.readLong();
+        mStartingBalance = new BigDecimal(in.readString());
+        mCurrentBalance = new BigDecimal(in.readString());
+        mClearedBalance = new BigDecimal(in.readString());
+        mAccountName = in.readString();
+        mAccountDateCreated = new Date(in.readLong());
+        mTransactionEntries = new ArrayList<>();
+        in.readTypedList(mTransactionEntries, Transaction.CREATOR);
     }
 }

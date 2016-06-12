@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.brandon14.checkbook.objects.Account;
+import com.brandon14.checkbook.model.Account;
 import com.brandon14.checkbook.R;
 
 import java.math.BigDecimal;

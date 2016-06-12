@@ -1,4 +1,4 @@
-package com.brandon14.checkbook.objects;
+package com.brandon14.checkbook.model;
 
 /**
  * Created by brandon on 1/30/15.

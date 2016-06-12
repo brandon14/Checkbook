@@ -17,9 +17,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 
-import com.brandon14.checkbook.database.Checkbook;
+import com.brandon14.checkbook.model.database.Checkbook;
 import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
-import com.brandon14.checkbook.objects.Account;
+import com.brandon14.checkbook.model.Account;
 import com.brandon14.checkbook.resultcodes.AccountResultCodes;
 import com.brandon14.checkbook.utilities.MoneyTextWatcher;
 import com.brandon14.checkbook.utilities.NumberUtilities;
@@ -151,7 +151,8 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
 
                 if (isUpdated) {
                     // Add results to mAdapter in Fragment Class
-                    Intent intent = getIntent().putExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT, mAccount);
+                    Intent intent = getIntent();
+                    intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT, mAccount);
                     intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, mAccountPosition);
 
                     this.setResult(AccountResultCodes.ACCOUNT_UPDATED, intent);
@@ -162,7 +163,8 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
 
                 if (account != null) {
                     // Add results to mAdapter in Fragment Class.
-                    Intent intent = getIntent().putExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT, account);
+                    Intent intent = getIntent();
+                    intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT, account);
                     
                     this.setResult(AccountResultCodes.ACCOUNT_CREATED, intent);
                     this.finish();

@@ -9,17 +9,15 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.brandon14.checkbook.adapters.TransactionAdapter;
-import com.brandon14.checkbook.database.Checkbook;
+import com.brandon14.checkbook.model.database.Checkbook;
 import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
-import com.brandon14.checkbook.objects.Account;
+import com.brandon14.checkbook.model.Account;
 import com.brandon14.checkbook.requests.ActivityRequests;
-import com.brandon14.checkbook.requests.FragmentRequests;
 import com.brandon14.checkbook.resultcodes.AccountResultCodes;
 
 import java.text.DecimalFormat;

@@ -14,7 +14,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -24,9 +23,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.brandon14.checkbook.AccountActivity;
-import com.brandon14.checkbook.database.Checkbook;
+import com.brandon14.checkbook.model.database.Checkbook;
 import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
-import com.brandon14.checkbook.objects.Account;
+import com.brandon14.checkbook.model.Account;
 import com.brandon14.checkbook.adapters.AccountAdapter;
 import com.brandon14.checkbook.AddEditAccount;
 import com.brandon14.checkbook.R;
@@ -229,11 +228,11 @@ public class AccountsFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == AccountResultCodes.ACCOUNT_CREATED) {
-            Account account = (Account) data.getSerializableExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT);
+            Account account = data.getParcelableExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT);
 
             mAccountAdapter.addAccount(account);
         } else if (resultCode == AccountResultCodes.ACCOUNT_UPDATED) {
-            Account account = (Account) data.getSerializableExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT);
+            Account account = data.getParcelableExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT);
             int position = data.getIntExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, -1);
 
             mAccountAdapter.updateAccount(account, position);

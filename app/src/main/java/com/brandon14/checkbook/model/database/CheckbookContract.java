@@ -1,4 +1,4 @@
-package com.brandon14.checkbook.database;
+package com.brandon14.checkbook.model.database;
 
 import android.provider.BaseColumns;
 

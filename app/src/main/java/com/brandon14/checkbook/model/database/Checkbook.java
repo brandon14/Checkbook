@@ -1,8 +1,8 @@
-package com.brandon14.checkbook.database;
+package com.brandon14.checkbook.model.database;
 
 import android.content.Context;
 
-import com.brandon14.checkbook.objects.Account;
+import com.brandon14.checkbook.model.Account;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -17,7 +17,6 @@ public class Checkbook {
     private static Checkbook sCheckbookInstance;
 
     private CheckbookDbHelper mDbHelper;
-    private ArrayList<Account> mAccountList;
 
     public Checkbook(Context context) {
         mDbHelper = new CheckbookDbHelper(context);
@@ -39,9 +38,7 @@ public class Checkbook {
     }
 
     public ArrayList<Account> getAccountEntries() {
-        mAccountList = mDbHelper.getAccountEntries();
-
-        return mAccountList;
+        return mDbHelper.getAccountEntries();
     }
 
     public Account getAccount(long accountId) {

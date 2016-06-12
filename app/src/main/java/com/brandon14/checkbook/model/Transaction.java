@@ -1,5 +1,7 @@
-package com.brandon14.checkbook.objects;
+package com.brandon14.checkbook.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import java.math.BigDecimal;
@@ -9,7 +11,7 @@ import java.util.Date;
 /**
  * Created by brandon on 1/30/15.
  */
-public class Transaction {
+public class Transaction implements Parcelable {
     private static final String LOG_TAG = "Transaction";
 
     private int mId;
@@ -26,10 +28,6 @@ public class Transaction {
     private String mCheckNumber;
     private String mNotes;
     private Date mDate;
-
-    public Transaction() {
-
-    }
 
     public Transaction(int id, String transPayee, BigDecimal transAmount,
                        Date transDate, String checkNumber, int transCategory,
@@ -149,5 +147,32 @@ public class Transaction {
 
     public void setDate(Date mDate) {
         this.mDate = mDate;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+
+        @Override
+        public Transaction createFromParcel(Parcel source) {
+            return new Transaction(source);
+        }
+
+        @Override
+        public Transaction[] newArray(int size) {
+            return new Transaction[size];
+        }
+    };
+
+    private Transaction(Parcel in) {
+
     }
 }

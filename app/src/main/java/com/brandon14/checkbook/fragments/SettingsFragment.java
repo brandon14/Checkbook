@@ -37,8 +37,6 @@ public class SettingsFragment extends Fragment implements AbsListView.OnItemClic
      */
     private ListAdapter mAdapter;
 
-    private static SettingsFragment sFragmentInstance;
-
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -46,9 +44,7 @@ public class SettingsFragment extends Fragment implements AbsListView.OnItemClic
      * @return A new instance of fragment SettingsFragment.
      */
     public static SettingsFragment newInstance() {
-        sFragmentInstance = sFragmentInstance == null ? new SettingsFragment() : sFragmentInstance;
-
-        return sFragmentInstance;
+        return new SettingsFragment();
     }
 
     /**

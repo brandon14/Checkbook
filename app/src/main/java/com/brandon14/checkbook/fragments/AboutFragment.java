@@ -17,7 +17,7 @@ import com.brandon14.checkbook.R;
  * create an instance of this fragment.
  */
 public class AboutFragment extends Fragment {
-    private static AboutFragment sFragmentInstance;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -25,9 +25,7 @@ public class AboutFragment extends Fragment {
      * @return A new instance of fragment AboutFragment.
      */
     public static AboutFragment newInstance() {
-        sFragmentInstance = sFragmentInstance == null ? new AboutFragment() : sFragmentInstance;
-
-        return sFragmentInstance;
+        return new AboutFragment();
     }
 
     public AboutFragment() {

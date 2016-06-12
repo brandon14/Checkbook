@@ -48,8 +48,6 @@ public class AccountsFragment extends Fragment {
     private static final String LOG_TAG = "AccountsFragment";
     private static final String RECYCLER_VIEW_STATE_KEY = "recycler_view_state";
 
-    private static AccountsFragment sFragmentInstance;
-
     private AccountAdapter mAccountAdapter;
     private LinearLayoutManager mLayoutManager;
     private ContextMenuRecyclerView mAccountsRecyclerView;
@@ -68,9 +66,7 @@ public class AccountsFragment extends Fragment {
      * @return A new instance of fragment AccountFragment.
      */
     public static AccountsFragment getInstance() {
-        sFragmentInstance = sFragmentInstance == null ? new AccountsFragment() : sFragmentInstance;
-
-        return sFragmentInstance;
+        return new AccountsFragment();
     }
 
     /**
@@ -182,7 +178,7 @@ public class AccountsFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which){
                             case DialogInterface.BUTTON_POSITIVE:
-                                if (!Checkbook.getInstance().deleteAccount(selectedAccount.getAccountId())) {
+                                if (!Checkbook.getInstance(getContext()).deleteAccount(selectedAccount.getAccountId())) {
                                     Snackbar snackbar = Snackbar.make(getActivity().findViewById(R.id.accounts_fragment_coordinator),
                                             getResources().getString(R.string.str_error_deleting_account), Snackbar.LENGTH_LONG);
                                     snackbar.show();
@@ -253,7 +249,7 @@ public class AccountsFragment extends Fragment {
         registerForContextMenu(mAccountsRecyclerView);
 
         mAccountAdapter = new AccountAdapter(getActivity(),
-                Checkbook.getInstance().getAccountEntries());
+                Checkbook.getInstance(getContext()).getAccountEntries());
         mAccountAdapter.SetOnViewClickListener(new AccountAdapter.OnViewClickListener() {
             @Override
             public void onViewClick(View v, int position) {

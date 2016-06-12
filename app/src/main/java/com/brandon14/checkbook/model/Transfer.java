@@ -1,32 +1,31 @@
 package com.brandon14.checkbook.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by brandon on 1/30/15.
  */
-public class Transfer {
-    private int mId;
-    private int mToAccountId;
-    private int mFromAccountId;
+public class Transfer implements Parcelable {
+    private long mId;
+    private long mToAccountId;
+    private long mFromAccountId;
 
-    public Transfer() {
-
-    }
-
-    public Transfer(int id, int toAccountId, int fromAccountId) {
+    public Transfer(long id, long toAccountId, long fromAccountId) {
         this.mId = id;
         this.mToAccountId = toAccountId;
         this.mFromAccountId = fromAccountId;
     }
 
-    public int getFromAccountId() {
+    public long getFromAccountId() {
         return mFromAccountId;
     }
 
-    public void setFromAccountId(int mFromAccountId) {
+    public void setFromAccountId(long mFromAccountId) {
         this.mFromAccountId = mFromAccountId;
     }
 
-    public int getId() {
+    public long getId() {
         return mId;
     }
 
@@ -34,11 +33,42 @@ public class Transfer {
         this.mId = mId;
     }
 
-    public int getToAccountId() {
+    public long getToAccountId() {
         return mToAccountId;
     }
 
-    public void setToAccountId(int mToAccountId) {
+    public void setToAccountId(long mToAccountId) {
         this.mToAccountId = mToAccountId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mId);
+        dest.writeLong(mToAccountId);
+        dest.writeLong(mFromAccountId);
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+
+        @Override
+        public Transfer createFromParcel(Parcel source) {
+            return new Transfer(source);
+        }
+
+        @Override
+        public Transfer[] newArray(int size) {
+            return new Transfer[size];
+        }
+    };
+
+    private Transfer(Parcel in) {
+        mId = in.readLong();
+        mToAccountId = in.readLong();
+        mFromAccountId = in.readLong();
     }
 }

@@ -10,6 +10,7 @@ import com.brandon14.checkbook.R;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.Currency;
 
 /**
  *
@@ -28,7 +29,7 @@ public class MoneyTextWatcher implements TextWatcher {
     public MoneyTextWatcher(Context context, EditText editText) {
         mEditTextWeakReference = new WeakReference<>(editText);
 
-        mContext = context;
+        mContext = context.getApplicationContext();
     }
 
     @Override
@@ -53,8 +54,8 @@ public class MoneyTextWatcher implements TextWatcher {
             return;
         }
 
-        String zeroString = NumberFormat.getCurrencyInstance().format(BigDecimal.ZERO);
-        zeroString = zeroString.substring(0, zeroString.length() - 1);
+        int fractionDigits = Currency.getInstance(mContext.getResources().getConfiguration().locale).getDefaultFractionDigits();
+        String zeroString = BigDecimal.ZERO.setScale(fractionDigits - 1, BigDecimal.ROUND_HALF_UP).toString();
 
         if (s.equals(zeroString)) {
             editText.removeTextChangedListener(this);
@@ -72,7 +73,7 @@ public class MoneyTextWatcher implements TextWatcher {
         editText.removeTextChangedListener(this);
 
         String cleanString = s.replaceAll("[^0-9]", "");
-        BigDecimal parsed = new BigDecimal(cleanString).setScale(2, BigDecimal.ROUND_HALF_UP).divide(new BigDecimal(100), BigDecimal.ROUND_HALF_UP);
+        BigDecimal parsed = new BigDecimal(cleanString).setScale(fractionDigits, BigDecimal.ROUND_HALF_UP).divide(new BigDecimal(100), BigDecimal.ROUND_HALF_UP);
         String formatted = String.format(mContext.getResources().getConfiguration().locale, mContext.getResources().getString(R.string.str_amount_input_format), parsed);
 
         editText.setText(formatted);

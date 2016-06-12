@@ -29,13 +29,13 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
     private OnViewClickListener mViewClickListener;
 
     public AccountAdapter(Context context, ArrayList<Account> entries) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         mAccountList = entries;
     }
 
     @Override
     public AccountAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final LayoutInflater mInflater = LayoutInflater.from(mContext);
+        final LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
         final View v = mInflater.inflate(R.layout.account_recyclerview_layout, parent, false);
 
         return new ViewHolder(v);

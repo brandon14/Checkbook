@@ -25,7 +25,7 @@ public class TransactionAdapter extends BaseAdapter {
     private Context mContext;
 
     public TransactionAdapter(Context context, ArrayList<Transaction> entries) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         mTransactionEntries = entries;
         mInflater = LayoutInflater.from(context);
     }
@@ -35,7 +35,7 @@ public class TransactionAdapter extends BaseAdapter {
     }
 
     public static class TransactionViewHolder {
-        TextView transactionNameView;
+        TextView transactionPayeeView;
         TextView transactionAmountView;
         TextView transactionDateView;
     }
@@ -99,8 +99,8 @@ public class TransactionAdapter extends BaseAdapter {
             convertView = mInflater.inflate(R.layout.transaction_listview_layout, parent, false);
 
             viewHolder = new TransactionViewHolder();
-            viewHolder.transactionNameView = (TextView) convertView.findViewById(
-                    R.id.textview_transaction_listview_transaction_name);
+            viewHolder.transactionPayeeView = (TextView) convertView.findViewById(
+                    R.id.textview_transaction_listview_transaction_payee);
             viewHolder.transactionAmountView = (TextView) convertView.findViewById(
                     R.id.textview_transaction_listview_transaction_amount);
             viewHolder.transactionDateView = (TextView) convertView.findViewById(
@@ -115,12 +115,12 @@ public class TransactionAdapter extends BaseAdapter {
 
         BigDecimal amount = trans.getAmount();
 
-        String transactionName = trans.getPayee();
+        String transactionPayee = Checkbook.getInstance(mContext).getPayeeName(trans.getPayee());
         String transactionAmount = DecimalFormat.getCurrencyInstance().format(amount.doubleValue());
 
-        String transactionDate = new SimpleDateFormat(Checkbook.getDatabaseShortDateFormat(), mContext.getResources().getConfiguration().locale).format(trans.getDate());
+        String transactionDate = new SimpleDateFormat(Checkbook.SHORT_DATE_FORMAT, mContext.getResources().getConfiguration().locale).format(trans.getDate());
 
-        viewHolder.transactionNameView.setText(transactionName);
+        viewHolder.transactionPayeeView.setText(transactionPayee);
         viewHolder.transactionAmountView.setText(transactionAmount);
         viewHolder.transactionDateView.setText(transactionDate);
 

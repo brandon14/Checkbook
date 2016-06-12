@@ -16,7 +16,6 @@ import com.brandon14.checkbook.R;
  * create an instance of this fragment.
  */
 public class RecurringFragment extends Fragment {
-    private static RecurringFragment sFragmentInstance;
     /**
      * * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -24,9 +23,7 @@ public class RecurringFragment extends Fragment {
      * @return A new instance of fragment RecurringFragment.
      */
     public static RecurringFragment newInstance() {
-        sFragmentInstance = sFragmentInstance == null ? new RecurringFragment() : sFragmentInstance;
-
-        return sFragmentInstance;
+        return new RecurringFragment();
     }
 
     public RecurringFragment() {

@@ -17,9 +17,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 
-import com.brandon14.checkbook.model.database.Checkbook;
 import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
 import com.brandon14.checkbook.model.Account;
+import com.brandon14.checkbook.model.database.Checkbook;
 import com.brandon14.checkbook.resultcodes.AccountResultCodes;
 import com.brandon14.checkbook.utilities.MoneyTextWatcher;
 import com.brandon14.checkbook.utilities.NumberUtilities;
@@ -96,10 +96,10 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
 
         Calendar cal = new GregorianCalendar();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(Checkbook.getDatabaseShortDateFormat(), getResources().getConfiguration().locale);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(Checkbook.SHORT_DATE_FORMAT, getResources().getConfiguration().locale);
 
         if (mIsEdit) {
-            mAccount = Checkbook.getInstance().getAccount(accountId);
+            mAccount = Checkbook.getInstance(getApplicationContext()).getAccount(accountId);
             mAccountNameEditText.setText(mAccount.getAccountName());
             mAccountBalanceEditText.setText(DecimalFormat.getCurrencyInstance().format(mAccount.getStartingBalance().doubleValue()));
             mAccountDate = mAccount.getAccountDateCreated();
@@ -203,7 +203,7 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
 
         String accountName = mAccountNameEditText.getEditableText().toString();
 
-        long accountId = Checkbook.getInstance().addAccount(accountName, accountBalance, mAccountDate);
+        long accountId = Checkbook.getInstance(getApplicationContext()).addAccount(accountName, accountBalance, mAccountDate);
 
         if (accountId != -1) {
             return new Account(accountId, accountName, accountBalance, mAccountDate);
@@ -236,7 +236,7 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
         mAccount.setAccountName(accountName);
         mAccount.setStartingBalance(accountBalance);
 
-        return Checkbook.getInstance().updateAccount(mAccount.getAccountId(), accountName, accountBalance,
+        return Checkbook.getInstance(getApplicationContext()).updateAccount(mAccount.getAccountId(), accountName, accountBalance,
                 mAccountDate);
     }
 
@@ -262,7 +262,7 @@ public class AddEditAccount extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(Checkbook.getDatabaseShortDateFormat(), getResources().getConfiguration().locale);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(Checkbook.SHORT_DATE_FORMAT, getResources().getConfiguration().locale);
 
         mAccountDate = dateFormat.parse(monthOfYear + 1 + "/" + dayOfMonth + "/" + year, new ParsePosition(0));
 

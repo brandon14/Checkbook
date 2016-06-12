@@ -2,6 +2,7 @@ package com.brandon14.checkbook;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
@@ -14,9 +15,9 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.brandon14.checkbook.adapters.TransactionAdapter;
-import com.brandon14.checkbook.model.database.Checkbook;
 import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
 import com.brandon14.checkbook.model.Account;
+import com.brandon14.checkbook.model.database.Checkbook;
 import com.brandon14.checkbook.requests.ActivityRequests;
 import com.brandon14.checkbook.resultcodes.AccountResultCodes;
 
@@ -57,7 +58,7 @@ public class AccountActivity extends AppCompatActivity {
 
         mTitle = mAccountName;
 
-        mAccount = Checkbook.getInstance().getAccount(mAccountId);
+        mAccount = Checkbook.getInstance(getApplicationContext()).getAccount(mAccountId);
 
         setContentView(R.layout.activity_account);
 
@@ -116,10 +117,14 @@ public class AccountActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            if (!Checkbook.getInstance().deleteAccount(mAccount.getAccountId())) {
-                                Snackbar snackbar = Snackbar.make(findViewById(R.id.accounts_fragment_coordinator),
-                                        getResources().getString(R.string.str_error_deleting_account), Snackbar.LENGTH_LONG);
-                                snackbar.show();
+                            if (!Checkbook.getInstance(getApplicationContext()).deleteAccount(mAccount.getAccountId())) {
+                                CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.accounts_fragment_coordinator);
+
+                                if (coordinatorLayout != null) {
+                                    Snackbar snackbar = Snackbar.make(coordinatorLayout,
+                                            getResources().getString(R.string.str_error_deleting_account), Snackbar.LENGTH_LONG);
+                                    snackbar.show();
+                                }
                             }
 
                             Intent intent = getIntent().putExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, mAccountPosition);
@@ -148,7 +153,7 @@ public class AccountActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        mAccount = Checkbook.getInstance().getAccount(mAccountId);
+        mAccount = Checkbook.getInstance(getApplicationContext()).getAccount(mAccountId);
         mAccountName = mAccount.getAccountName();
 
         mTitle = mAccountName;

@@ -16,7 +16,6 @@ import com.brandon14.checkbook.R;
  * create an instance of this fragment.
  */
 public class ReportsFragment extends Fragment {
-    private static ReportsFragment sFragmentInstance;
 
     /**
      * * Use this factory method to create a new instance of
@@ -25,9 +24,7 @@ public class ReportsFragment extends Fragment {
      * @return A new instance of fragment ReportsFragment.
      */
     public static ReportsFragment newInstance() {
-        sFragmentInstance = sFragmentInstance == null ? new ReportsFragment() : sFragmentInstance;
-
-        return sFragmentInstance;
+        return new ReportsFragment();
     }
 
     public ReportsFragment() {

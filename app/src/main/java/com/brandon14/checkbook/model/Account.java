@@ -3,10 +3,8 @@ package com.brandon14.checkbook.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -56,12 +54,6 @@ public class Account implements Comparable<Account>, Parcelable {
     }
 
     public BigDecimal getStartingBalance() {
-        try {
-            mStartingBalance = mStartingBalance.setScale(2, RoundingMode.HALF_UP);
-        } catch (ArithmeticException | NullPointerException e) {
-            Log.e(LOG_TAG, e.getMessage());
-        }
-
         return mStartingBalance;
     }
 
@@ -70,12 +62,6 @@ public class Account implements Comparable<Account>, Parcelable {
     }
 
     public BigDecimal getCurrentBalance() {
-        try {
-            mCurrentBalance = mCurrentBalance.setScale(2, RoundingMode.HALF_UP);
-        } catch (ArithmeticException | NullPointerException e) {
-            Log.e(LOG_TAG, e.getMessage());
-        }
-
         return mCurrentBalance;
     }
 
@@ -84,12 +70,6 @@ public class Account implements Comparable<Account>, Parcelable {
     }
 
     public BigDecimal getClearedBalance() {
-        try {
-            mClearedBalance = mClearedBalance.setScale(2, RoundingMode.HALF_UP);
-        } catch (ArithmeticException | NullPointerException e) {
-            Log.e(LOG_TAG, e.getMessage());
-        }
-
         return mClearedBalance;
     }
 

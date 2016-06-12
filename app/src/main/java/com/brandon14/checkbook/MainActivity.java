@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 
-import com.brandon14.checkbook.model.database.Checkbook;
 import com.brandon14.checkbook.fragments.AboutFragment;
 import com.brandon14.checkbook.fragments.AccountsFragment;
 import com.brandon14.checkbook.fragments.HelpFragment;
@@ -43,8 +42,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
-        Checkbook checkbook = new Checkbook(getApplicationContext());
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);

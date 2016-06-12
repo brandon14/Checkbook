@@ -2,10 +2,8 @@ package com.brandon14.checkbook.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Date;
 
 /**
@@ -14,25 +12,25 @@ import java.util.Date;
 public class Transaction implements Parcelable {
     private static final String LOG_TAG = "Transaction";
 
-    private int mId;
+    private long mId;
 
-    private int mAccountId;
-    private int mCategory;
+    private long mAccountId;
+    private long mCategory;
     private boolean mIsCleared;
     private boolean mIsRecurring;
     private int mRecurringType;
     private int mRecurringLength;
 
     private BigDecimal mAmount;
-    private String mPayee;
+    private long mPayee;
     private String mCheckNumber;
     private String mNotes;
     private Date mDate;
 
-    public Transaction(int id, String transPayee, BigDecimal transAmount,
-                       Date transDate, String checkNumber, int transCategory,
+    public Transaction(long id, long transPayee, BigDecimal transAmount,
+                       Date transDate, String checkNumber, long transCategory,
                        String transNotes, boolean isCleared, boolean isRecurring,
-                       int recurringType, int recurringLength, int accountId) {
+                       int recurringType, int recurringLength, long accountId) {
         this.mId = id;
         this.mAmount = transAmount;
         this.mDate = transDate;
@@ -47,23 +45,23 @@ public class Transaction implements Parcelable {
         this.mAccountId = accountId;
     }
 
-    public int getId() {
+    public long getId() {
         return mId;
     }
 
-    public void setId(int mId) {
+    public void setId(long mId) {
         this.mId = mId;
     }
 
-    public int getAccountId() {
+    public long getAccountId() {
         return mAccountId;
     }
 
-    public void setAccountId(int mAccountId) {
+    public void setAccountId(long mAccountId) {
         this.mAccountId = mAccountId;
     }
 
-    public int getCategory() {
+    public long getCategory() {
         return mCategory;
     }
 
@@ -104,12 +102,6 @@ public class Transaction implements Parcelable {
     }
 
     public BigDecimal getAmount() {
-        try {
-            mAmount = mAmount.setScale(2, RoundingMode.HALF_UP);
-        } catch (ArithmeticException | NullPointerException e) {
-            Log.e(LOG_TAG, e.getMessage());
-        }
-
         return mAmount;
     }
 
@@ -117,11 +109,11 @@ public class Transaction implements Parcelable {
         this.mAmount = mAmount;
     }
 
-    public String getPayee() {
+    public long getPayee() {
         return mPayee;
     }
 
-    public void setPayee(String mPayee) {
+    public void setPayee(long mPayee) {
         this.mPayee = mPayee;
     }
 
@@ -156,7 +148,18 @@ public class Transaction implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-
+        dest.writeLong(mId);
+        dest.writeLong(mAccountId);
+        dest.writeLong(mCategory);
+        dest.writeInt(mIsCleared ? 1 : 0);
+        dest.writeInt(mIsRecurring ? 1 : 0);
+        dest.writeInt(mRecurringType);
+        dest.writeInt(mRecurringLength);
+        dest.writeString(mAmount.toString());
+        dest.writeLong(mPayee);
+        dest.writeString(mCheckNumber);
+        dest.writeString(mNotes);
+        dest.writeLong(mDate.getTime());
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -173,6 +176,17 @@ public class Transaction implements Parcelable {
     };
 
     private Transaction(Parcel in) {
-
+        mId = in.readLong();
+        mAccountId = in.readLong();
+        mCategory = in.readLong();
+        mIsCleared = in.readInt() != 0;
+        mIsRecurring = in.readInt() != 0;
+        mRecurringType = in.readInt();
+        mRecurringLength = in.readInt();
+        mAmount = new BigDecimal(in.readString());
+        mPayee = in.readLong();
+        mCheckNumber = in.readString();
+        mNotes = in.readString();
+        mDate = new Date(in.readLong());
     }
 }

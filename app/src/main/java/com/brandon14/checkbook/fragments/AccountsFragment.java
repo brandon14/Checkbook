@@ -35,6 +35,7 @@ import com.brandon14.checkbook.widgets.ContextMenuRecyclerView;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,6 +48,7 @@ public class AccountsFragment extends Fragment {
      */
     private static final String LOG_TAG = "AccountsFragment";
     private static final String RECYCLER_VIEW_STATE_KEY = "recycler_view_state";
+    private static final String ACCOUNT_LIST_STATE_KEY = "account_list_state";
 
     private AccountAdapter mAccountAdapter;
     private LinearLayoutManager mLayoutManager;
@@ -57,7 +59,7 @@ public class AccountsFragment extends Fragment {
     private FloatingActionButton mAddFAB;
     private Parcelable mRecyclerViewState;
 
-    private BigDecimal mTotalBalance;
+    private ArrayList<Account> mAccountList;
 
     /**
      * * Use this factory method to create a new instance of
@@ -79,6 +81,12 @@ public class AccountsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Retrieve list state and list/item positions
+        if(savedInstanceState != null) {
+            mRecyclerViewState = savedInstanceState.getParcelable(RECYCLER_VIEW_STATE_KEY);
+            mAccountList = savedInstanceState.getParcelableArrayList(ACCOUNT_LIST_STATE_KEY);
+        }
     }
 
     @Override
@@ -87,10 +95,6 @@ public class AccountsFragment extends Fragment {
 
         // Indicate that this fragment would like to influence the set of actions in the action bar.
         setHasOptionsMenu(true);
-
-        // Retrieve list state and list/item positions
-        if(savedInstanceState != null)
-            mRecyclerViewState = savedInstanceState.getParcelable(RECYCLER_VIEW_STATE_KEY);
     }
 
     @Override
@@ -104,6 +108,10 @@ public class AccountsFragment extends Fragment {
         mAddAccountMessage = (TextView) rootView.findViewById(R.id.text_view_add_account_message);
 
         mAccountsRecyclerView = (ContextMenuRecyclerView) rootView.findViewById(R.id.recycler_view_accounts);
+
+        if (mAccountList == null) {
+            mAccountList = Checkbook.getInstance(getContext()).getAccountEntries();
+        }
 
         setUpRecyclerView();
 
@@ -148,6 +156,7 @@ public class AccountsFragment extends Fragment {
 
         mRecyclerViewState = mLayoutManager.onSaveInstanceState();
         state.putParcelable(RECYCLER_VIEW_STATE_KEY, mRecyclerViewState);
+        state.putParcelableArrayList(ACCOUNT_LIST_STATE_KEY, mAccountList);
     }
 
     @Override
@@ -185,8 +194,7 @@ public class AccountsFragment extends Fragment {
                                 } else {
                                     mAccountAdapter.removeAccount(info.position);
 
-                                    refreshAccountMessage();
-                                    refreshTotalBalanceView();
+                                    notifyAccountDataChanged();
                                 }
 
                                 break;
@@ -238,8 +246,7 @@ public class AccountsFragment extends Fragment {
             mAccountAdapter.removeAccount(position);
         }
 
-        refreshAccountMessage();
-        refreshTotalBalanceView();
+        notifyAccountDataChanged();
     }
 
     private void setUpRecyclerView() {
@@ -248,8 +255,7 @@ public class AccountsFragment extends Fragment {
 
         registerForContextMenu(mAccountsRecyclerView);
 
-        mAccountAdapter = new AccountAdapter(getActivity(),
-                Checkbook.getInstance(getContext()).getAccountEntries());
+        mAccountAdapter = new AccountAdapter(getActivity(), mAccountList);
         mAccountAdapter.SetOnViewClickListener(new AccountAdapter.OnViewClickListener() {
             @Override
             public void onViewClick(View v, int position) {
@@ -264,19 +270,24 @@ public class AccountsFragment extends Fragment {
             }
         });
 
-        refreshAccountMessage();
+        notifyAccountDataChanged();
 
         mAccountsRecyclerView.setAdapter(mAccountAdapter);
     }
 
-    private void refreshTotalBalanceView() {
-        mTotalBalance = mAccountAdapter.getAccountsBalance();
+    private void notifyAccountDataChanged() {
+        refreshTotalBalanceView();
+        refreshAccountMessage();
+    }
 
-        if (mTotalBalance.compareTo(BigDecimal.ZERO) < 0) {
+    private void refreshTotalBalanceView() {
+        BigDecimal totalBalance = mAccountAdapter.getAccountsBalance();
+
+        if (totalBalance.compareTo(BigDecimal.ZERO) < 0) {
             mTotalBalanceTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.negative_red));
         }
 
-        mTotalBalanceTextView.setText(DecimalFormat.getCurrencyInstance().format(mTotalBalance.doubleValue()));
+        mTotalBalanceTextView.setText(DecimalFormat.getCurrencyInstance().format(totalBalance.doubleValue()));
     }
 
     private void refreshAccountMessage() {

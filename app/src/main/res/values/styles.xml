@@ -44,4 +44,8 @@
         <!-- We need a white arrow -->
         <item name="color">@android:color/white</item>
     </style>
+
+    <style name="RecyclerViewStyle" parent="Widget.AppCompat.Light.ListView.DropDown">
+
+    </style>
 </resources>

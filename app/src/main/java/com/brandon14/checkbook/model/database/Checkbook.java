@@ -10,6 +10,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.brandon14.checkbook.model.Account;
+import com.brandon14.checkbook.model.Transaction;
 
 import java.math.BigDecimal;
 import java.text.ParsePosition;
@@ -269,6 +270,11 @@ public class Checkbook extends SQLiteOpenHelper {
         return null;
     }
 
+    public ArrayList<Transaction> getTransactions(long accountId) {
+        ArrayList<Transaction> transactionList = new ArrayList<>();
+
+        return transactionList;
+    }
     // Transfer functions
 
     // Recurring functions

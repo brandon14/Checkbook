@@ -113,7 +113,8 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         BigDecimal accountsBalance = BigDecimal.ZERO;
 
         if (mAccountList != null) {
-            for (int i = 0; i < mAccountList.size(); i++) {
+            int size = mAccountList.size();
+            for (int i = 0; i < size; i++) {
                 try {
                     accountsBalance = accountsBalance.add(mAccountList.get(i).getCurrentBalance());
                 } catch (NullPointerException e) {

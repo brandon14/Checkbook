@@ -13,6 +13,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -103,6 +104,8 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        mDrawerToggle.syncState();
 
         // Indicate that this fragment would like to influence the set of actions in the action bar.
         setHasOptionsMenu(true);
@@ -205,7 +208,6 @@ public class NavigationDrawerFragment extends Fragment {
                     window.setStatusBarColor(ContextCompat.getColor(getContext(), R.color.primary_dark));
                 }
 
-
                 if (!mUserLearnedDrawer) {
                     // The user manually closed the drawer; store this flag to prevent auto-showing
                     // the navigation drawer automatically in the future.
@@ -230,6 +232,7 @@ public class NavigationDrawerFragment extends Fragment {
                     return;
                 }
 
+
                 if (!mUserLearnedDrawer) {
                     // The user manually opened the drawer; store this flag to prevent auto-showing
                     // the navigation drawer automatically in the future.
@@ -243,21 +246,28 @@ public class NavigationDrawerFragment extends Fragment {
             }
         };
 
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+
         // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
         // per the navigation drawer design guidelines.
         if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
             mDrawerLayout.openDrawer(mFragmentContainerView);
-        }
 
-        // Defer code dependent on restoration of previous instance state.
-        mDrawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerToggle.syncState();
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP){
+                // Do something for lollipop and above versions
+
+                Window window = getActivity().getWindow();
+
+                // clear FLAG_TRANSLUCENT_STATUS flag:
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+                // add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+                // finally change the color to any color with transparency
+                window.setStatusBarColor(ContextCompat.getColor(getContext(), R.color.transparent));
             }
-        });
-
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        }
     }
 
     private boolean handleNavigationItemSelected(MenuItem item) {
@@ -342,6 +352,16 @@ public class NavigationDrawerFragment extends Fragment {
         mCurrentSelectedPosition = itemPosition;
 
         mDrawerNavigationView.getMenu().getItem(mCurrentSelectedPosition).setChecked(true);
+    }
+
+    public void toggleHomeIndicator(boolean show) {
+        mDrawerToggle.setDrawerIndicatorEnabled(show);
+
+        if (!show) {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        } else {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
     }
 
     /**

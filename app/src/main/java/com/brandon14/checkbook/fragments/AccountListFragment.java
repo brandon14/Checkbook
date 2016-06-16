@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.brandon14.checkbook.AccountActivity;
 import com.brandon14.checkbook.model.database.Checkbook;
 import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
 import com.brandon14.checkbook.model.Account;
@@ -39,16 +38,18 @@ import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link AccountsFragment#getInstance} factory method to
+ * Use the {@link AccountListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AccountsFragment extends Fragment {
+public class AccountListFragment extends Fragment {
     /**
      *
      */
-    private static final String LOG_TAG = "AccountsFragment";
+    private static final String LOG_TAG = "AccountListFragment";
     private static final String RECYCLER_VIEW_STATE_KEY = "recycler_view_state";
     private static final String ACCOUNT_LIST_STATE_KEY = "account_list_state";
+
+    private AccountListNavigationCallbacks mNavigationCallback;
 
     private AccountAdapter mAccountAdapter;
     private LinearLayoutManager mLayoutManager;
@@ -67,14 +68,14 @@ public class AccountsFragment extends Fragment {
      *
      * @return A new instance of fragment AccountFragment.
      */
-    public static AccountsFragment getInstance() {
-        return new AccountsFragment();
+    public static AccountListFragment newInstance() {
+        return new AccountListFragment();
     }
 
     /**
      *
      */
-    public AccountsFragment() {
+    public AccountListFragment() {
         // Required empty public constructor
     }
 
@@ -100,7 +101,7 @@ public class AccountsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_accounts, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_account_list, container, false);
 
         mTotalBalanceTextView = (TextView) rootView
                 .findViewById(R.id.text_view_total_balance);
@@ -137,8 +138,18 @@ public class AccountsFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        Activity activity = getActivity();
-        activity.setTitle(getResources().getString(R.string.title_accounts));
+        try {
+            mNavigationCallback = (AccountListNavigationCallbacks) getActivity();
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity must implement AccountNavigationCallbacks.");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        mNavigationCallback = null;
     }
 
     @Override
@@ -148,6 +159,9 @@ public class AccountsFragment extends Fragment {
         if (mRecyclerViewState != null) {
             mLayoutManager.onRestoreInstanceState(mRecyclerViewState);
         }
+
+        Activity activity = getActivity();
+        activity.setTitle(getResources().getString(R.string.title_accounts));
     }
 
     @Override
@@ -261,12 +275,15 @@ public class AccountsFragment extends Fragment {
             public void onViewClick(View v, int position) {
                 final Account account = mAccountAdapter.getItem(position);
 
+                mNavigationCallback.launchAccountFragment(account.getAccountId(), account.getAccountName(), position);
+
+                /*
                 Intent intent = new Intent(getActivity(), AccountActivity.class);
                 intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_TITLE, account.getAccountName());
                 intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_ID, account.getAccountId());
                 intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, position);
 
-                startActivityForResult(intent, FragmentRequests.ACCOUNT_FRAGMENT_REQUEST);
+                startActivityForResult(intent, FragmentRequests.ACCOUNT_FRAGMENT_REQUEST);*/
             }
         });
 
@@ -300,5 +317,10 @@ public class AccountsFragment extends Fragment {
             mAccountsRecyclerView.setVisibility(View.VISIBLE);
             mAddAccountMessage.setVisibility(View.GONE);
         }
+    }
+
+    public interface AccountListNavigationCallbacks {
+        void launchAccountFragment(long accountId, String accountName, int accountPosition);
+        void launchAddEditAccount();
     }
 }

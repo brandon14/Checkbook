@@ -2,10 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.brandon14.checkbook">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:name="com.brandon14.checkbook.application.CheckbookApplication"
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
@@ -25,28 +29,12 @@
                 android:value="com.brandon14.checkbook.MainActivity" />
         </activity>
         <activity
-            android:name=".AccountActivity"
-            android:label="@string/title_activity_account"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.brandon14.checkbook.MainActivity" />
-        </activity>
-        <activity
             android:name=".AddEditTransaction"
-            android:label="@string/title_add_transaction"
-            android:parentActivityName=".AccountActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.brandon14.checkbook.AccountActivity" />
+            android:label="@string/title_add_transaction">
         </activity>
         <activity
             android:name=".AddEditTransfer"
-            android:label="@string/title_add_transfer"
-            android:parentActivityName=".AccountActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.brandon14.checkbook.AccountActivity" />
+            android:label="@string/title_add_transfer">
         </activity>
     </application>
 

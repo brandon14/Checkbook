@@ -13,7 +13,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 
 import com.brandon14.checkbook.fragments.AboutFragment;
-import com.brandon14.checkbook.fragments.AccountsFragment;
+import com.brandon14.checkbook.fragments.AccountFragment;
+import com.brandon14.checkbook.fragments.AccountListFragment;
 import com.brandon14.checkbook.fragments.HelpFragment;
 import com.brandon14.checkbook.fragments.NavigationDrawerFragment;
 import com.brandon14.checkbook.fragments.RecurringFragment;
@@ -25,6 +26,8 @@ import com.brandon14.checkbook.fragments.SettingsFragment;
  */
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        AccountListFragment.AccountListNavigationCallbacks,
+        AccountFragment.AccountNavigationCallbacks,
         SettingsFragment.OnSettingsFragmentInteractionListener {
     private static final String LOG_TAG = "MainActivity";
 
@@ -60,6 +63,15 @@ public class MainActivity extends AppCompatActivity
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                    mNavigationDrawerFragment.toggleHomeIndicator(true);
+                }
+            }
+        });
     }
 
     @Override
@@ -82,12 +94,12 @@ public class MainActivity extends AppCompatActivity
         switch(id) {
             case R.id.navigation_menu_accounts:
                 if (fragmentManager.findFragmentById(R.id.container)
-                        instanceof AccountsFragment) {
+                        instanceof AccountListFragment) {
                     break;
                 }
 
                 fragmentManager.beginTransaction()
-                        .replace(R.id.container, AccountsFragment.getInstance(), AccountsFragment.class.getSimpleName())
+                        .replace(R.id.container, AccountListFragment.newInstance(), AccountListFragment.class.getSimpleName())
                         .commit();
 
                 break;
@@ -171,15 +183,22 @@ public class MainActivity extends AppCompatActivity
         }
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
-        final AccountsFragment fragment = (AccountsFragment) fragmentManager.findFragmentByTag(AccountsFragment.class.getSimpleName());
 
-        // If the Accounts fragment is not shown, show it and select it in the drawer.
-        if (fragment == null || !fragment.isVisible()) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, AccountsFragment.getInstance(), AccountsFragment.class.getSimpleName())
-                    .commit();
+        if (fragmentManager.getBackStackEntryCount() == 0) {
+            final AccountListFragment fragment = (AccountListFragment) fragmentManager.findFragmentByTag(AccountListFragment.class.getSimpleName());
 
-            mNavigationDrawerFragment.selectNavigationDrawerItem(0);
+            // If the Accounts fragment is not shown, show it and select it in the drawer.
+            if (fragment == null || !fragment.isVisible()) {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, AccountListFragment.newInstance(), AccountListFragment.class.getSimpleName())
+                        .commit();
+
+                mNavigationDrawerFragment.selectNavigationDrawerItem(0);
+
+                return;
+            }
+        } else {
+            fragmentManager.popBackStack();
 
             return;
         }
@@ -237,6 +256,23 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onSettingsFragmentInteraction(String id) {
+
+    }
+
+    @Override
+    public void launchAccountFragment(long accountId, String accountName, int accountPosition) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        mNavigationDrawerFragment.toggleHomeIndicator(false);
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, AccountFragment.newInstance(accountId, accountName, accountPosition), AccountListFragment.class.getSimpleName())
+                .addToBackStack(AccountFragment.class.getSimpleName())
+                .commit();
+    }
+
+    @Override
+    public void launchAddEditAccount() {
 
     }
 }

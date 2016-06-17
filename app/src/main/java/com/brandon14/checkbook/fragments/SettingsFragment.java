@@ -88,7 +88,7 @@ public class SettingsFragment extends Fragment implements AbsListView.OnItemClic
             mListener = (OnSettingsFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnSettingsFragmentInteractionListener");
         }
 
         activity.setTitle(getResources().getString(R.string.title_settings));

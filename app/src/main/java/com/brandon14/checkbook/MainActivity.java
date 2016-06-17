@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
@@ -15,11 +17,13 @@ import android.view.View;
 import com.brandon14.checkbook.fragments.AboutFragment;
 import com.brandon14.checkbook.fragments.AccountFragment;
 import com.brandon14.checkbook.fragments.AccountListFragment;
+import com.brandon14.checkbook.fragments.AddEditAccountFragment;
 import com.brandon14.checkbook.fragments.HelpFragment;
 import com.brandon14.checkbook.fragments.NavigationDrawerFragment;
 import com.brandon14.checkbook.fragments.RecurringFragment;
 import com.brandon14.checkbook.fragments.ReportsFragment;
 import com.brandon14.checkbook.fragments.SettingsFragment;
+import com.brandon14.checkbook.model.Account;
 
 /**
  *
@@ -27,17 +31,33 @@ import com.brandon14.checkbook.fragments.SettingsFragment;
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         AccountListFragment.AccountListNavigationCallbacks,
+        AccountFragment.OnAccountUpdateCallbacks,
         AccountFragment.AccountNavigationCallbacks,
+        AddEditAccountFragment.OnAccountAddEditCallbacks,
         SettingsFragment.OnSettingsFragmentInteractionListener {
     private static final String LOG_TAG = "MainActivity";
-
     private static final int BACK_PRESS_TIME = 2000;
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
-
     private Toolbar mToolbar;
 
-    private boolean mDoubleBackToExitPressedOnce = false;
+    private static boolean sDoubleBackToExitPressedOnce = false;
+
+    private static class BackPressHandler extends Handler {
+        public BackPressHandler() {
+            super();
+        }
+    }
+
+    private static final Runnable sBackPressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            sDoubleBackToExitPressedOnce = false;
+        }
+    };
+
+    private final BackPressHandler mBackPressHandler = new BackPressHandler();
+
     private CharSequence mTitle;
 
     @Override
@@ -100,6 +120,7 @@ public class MainActivity extends AppCompatActivity
 
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, AccountListFragment.newInstance(), AccountListFragment.class.getSimpleName())
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
 
                 break;
@@ -111,6 +132,7 @@ public class MainActivity extends AppCompatActivity
 
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, RecurringFragment.newInstance(), RecurringFragment.class.getSimpleName())
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
 
                 break;
@@ -122,6 +144,7 @@ public class MainActivity extends AppCompatActivity
 
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, ReportsFragment.newInstance(), ReportsFragment.class.getSimpleName())
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
 
                 break;
@@ -133,6 +156,7 @@ public class MainActivity extends AppCompatActivity
 
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, SettingsFragment.newInstance(), SettingsFragment.class.getSimpleName())
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
 
                 break;
@@ -144,6 +168,7 @@ public class MainActivity extends AppCompatActivity
 
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, HelpFragment.newInstance(), HelpFragment.class.getSimpleName())
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
 
                 break;
@@ -155,6 +180,7 @@ public class MainActivity extends AppCompatActivity
 
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, AboutFragment.newInstance(), AboutFragment.class.getSimpleName())
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
 
                 break;
@@ -169,7 +195,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         // If we have already pressed back once, then we can exit as normal.
-        if (mDoubleBackToExitPressedOnce) {
+        if (sDoubleBackToExitPressedOnce) {
             super.onBackPressed();
 
             return;
@@ -191,6 +217,7 @@ public class MainActivity extends AppCompatActivity
             if (fragment == null || !fragment.isVisible()) {
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, AccountListFragment.newInstance(), AccountListFragment.class.getSimpleName())
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
 
                 mNavigationDrawerFragment.selectNavigationDrawerItem(0);
@@ -210,16 +237,10 @@ public class MainActivity extends AppCompatActivity
             Snackbar.make(coordLayout, getResources().getString(R.string.str_press_back_to_exit), Snackbar.LENGTH_SHORT).show();
         }
 
-        mDoubleBackToExitPressedOnce = true;
+        sDoubleBackToExitPressedOnce = true;
 
-        // Post a new delayed runnable to return mDoubleBackToExitPressed back to false in BACK_PRESS_TIME amount of time.
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                mDoubleBackToExitPressedOnce = false;
-            }
-        }, BACK_PRESS_TIME);
+        // Post a new delayed runnable to return sDoubleBackToExitPressed back to false in BACK_PRESS_TIME amount of time.
+        mBackPressHandler.postDelayed(sBackPressRunnable, BACK_PRESS_TIME);
     }
 
     @Override
@@ -254,6 +275,7 @@ public class MainActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
+    // TODO redesign the SettingsFragment and redo the interface. Probably use a MaterialPreference library.
     @Override
     public void onSettingsFragmentInteraction(String id) {
 
@@ -266,13 +288,61 @@ public class MainActivity extends AppCompatActivity
         mNavigationDrawerFragment.toggleHomeIndicator(false);
 
         fragmentManager.beginTransaction()
-                .replace(R.id.container, AccountFragment.newInstance(accountId, accountName, accountPosition), AccountListFragment.class.getSimpleName())
+                .replace(R.id.container, AccountFragment.newInstance(accountId, accountName, accountPosition), AccountFragment.class.getSimpleName())
                 .addToBackStack(AccountFragment.class.getSimpleName())
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
     }
 
     @Override
-    public void launchAddEditAccount() {
+    public void launchAddEditAccount(boolean isEdit, long accountId, int accountPosition) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
+        mNavigationDrawerFragment.toggleHomeIndicator(false);
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, AddEditAccountFragment.newInstance(isEdit, accountId, accountPosition), AddEditAccountFragment.class.getSimpleName())
+                .addToBackStack(AddEditAccountFragment.class.getSimpleName())
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .commit();
+    }
+
+    @Override
+    public void onAccountDeleted(int position) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        AccountListFragment listFrag = (AccountListFragment) fragmentManager.findFragmentByTag(AccountListFragment.class.getSimpleName());
+
+        if (listFrag != null) {
+            listFrag.onAccountDeleted(position);
+        } else {
+            Log.e(LOG_TAG, "AccountListFragment was not found!");
+        }
+    }
+
+    @Override
+    public void onAccountAdded(Account account) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        AccountListFragment listFrag = (AccountListFragment) fragmentManager.findFragmentByTag(AccountListFragment.class.getSimpleName());
+
+        if (listFrag != null) {
+            listFrag.onAccountAdded(account);
+        } else {
+            Log.e(LOG_TAG, "AccountListFragment was not found!");
+        }
+    }
+
+    @Override
+    public void onAccountUpdated(int position, Account account) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        AccountListFragment listFrag = (AccountListFragment) fragmentManager.findFragmentByTag(AccountListFragment.class.getSimpleName());
+
+        if (listFrag != null) {
+            listFrag.onAccountUpdated(position, account);
+        } else {
+            Log.e(LOG_TAG, "AccountListFragment was not found!");
+        }
     }
 }

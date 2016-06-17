@@ -21,14 +21,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AddEditAccount"
-            android:label="@string/title_add_account"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.brandon14.checkbook.MainActivity" />
-        </activity>
-        <activity
             android:name=".AddEditTransaction"
             android:label="@string/title_add_transaction">
         </activity>

@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -23,13 +24,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.brandon14.checkbook.model.database.Checkbook;
-import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
 import com.brandon14.checkbook.model.Account;
 import com.brandon14.checkbook.adapters.AccountAdapter;
-import com.brandon14.checkbook.AddEditAccount;
 import com.brandon14.checkbook.R;
-import com.brandon14.checkbook.requests.FragmentRequests;
-import com.brandon14.checkbook.resultcodes.AccountResultCodes;
 import com.brandon14.checkbook.widgets.ContextMenuRecyclerView;
 
 import java.math.BigDecimal;
@@ -120,10 +117,7 @@ public class AccountListFragment extends Fragment {
         mAddFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), AddEditAccount.class);
-                intent.putExtra(AccountIntentKeys.ARG_IS_EDIT, false);
-
-                startActivityForResult(intent, FragmentRequests.ACCOUNT_FRAGMENT_REQUEST);
+                mNavigationCallback.launchAddEditAccount(false, -1, -1);
             }
         });
 
@@ -138,10 +132,11 @@ public class AccountListFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        try {
-            mNavigationCallback = (AccountListNavigationCallbacks) getActivity();
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement AccountNavigationCallbacks.");
+        if (context instanceof AccountListNavigationCallbacks) {
+            mNavigationCallback = (AccountListNavigationCallbacks) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement AccountListNavigationCallbacks.");
         }
     }
 
@@ -168,9 +163,14 @@ public class AccountListFragment extends Fragment {
     public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
 
-        mRecyclerViewState = mLayoutManager.onSaveInstanceState();
-        state.putParcelable(RECYCLER_VIEW_STATE_KEY, mRecyclerViewState);
-        state.putParcelableArrayList(ACCOUNT_LIST_STATE_KEY, mAccountList);
+        if (mLayoutManager != null) {
+            mRecyclerViewState = mLayoutManager.onSaveInstanceState();
+            state.putParcelable(RECYCLER_VIEW_STATE_KEY, mRecyclerViewState);
+        }
+
+        if (mAccountList != null) {
+            state.putParcelableArrayList(ACCOUNT_LIST_STATE_KEY, mAccountList);
+        }
     }
 
     @Override
@@ -226,41 +226,12 @@ public class AccountListFragment extends Fragment {
 
                 return true;
             case R.id.account_list_edit:
-
-                Intent intent = new Intent(getActivity(), AddEditAccount.class);
-                intent.putExtra(AccountIntentKeys.ARG_IS_EDIT, true);
-                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_TITLE, selectedAccount.getAccountName());
-                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_ID, selectedAccount.getAccountId());
-                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, info.position);
-
-                startActivityForResult(intent, FragmentRequests.ACCOUNT_FRAGMENT_REQUEST);
+                mNavigationCallback.launchAddEditAccount(true, selectedAccount.getAccountId(), info.position);
 
                 return true;
             default:
                 return super.onContextItemSelected(item);
         }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == AccountResultCodes.ACCOUNT_CREATED) {
-            Account account = data.getParcelableExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT);
-
-            mAccountAdapter.addAccount(account);
-        } else if (resultCode == AccountResultCodes.ACCOUNT_UPDATED) {
-            Account account = data.getParcelableExtra(AccountIntentKeys.ARG_ACCOUNT_OBJECT);
-            int position = data.getIntExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, -1);
-
-            mAccountAdapter.updateAccount(account, position);
-        } else if (resultCode == AccountResultCodes.ACCOUNT_DELETED) {
-            int position = data.getIntExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, -1);
-
-            mAccountAdapter.removeAccount(position);
-        }
-
-        notifyAccountDataChanged();
     }
 
     private void setUpRecyclerView() {
@@ -276,14 +247,6 @@ public class AccountListFragment extends Fragment {
                 final Account account = mAccountAdapter.getItem(position);
 
                 mNavigationCallback.launchAccountFragment(account.getAccountId(), account.getAccountName(), position);
-
-                /*
-                Intent intent = new Intent(getActivity(), AccountActivity.class);
-                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_TITLE, account.getAccountName());
-                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_ID, account.getAccountId());
-                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_POSITION, position);
-
-                startActivityForResult(intent, FragmentRequests.ACCOUNT_FRAGMENT_REQUEST);*/
             }
         });
 
@@ -319,8 +282,26 @@ public class AccountListFragment extends Fragment {
         }
     }
 
+    public void onAccountDeleted(int position) {
+        mAccountAdapter.removeAccount(position);
+
+        notifyAccountDataChanged();
+    }
+
+    public void onAccountUpdated(int position, Account account) {
+        mAccountAdapter.updateAccount(account, position);
+
+        notifyAccountDataChanged();
+    }
+
+    public void onAccountAdded(Account account) {
+        mAccountAdapter.addAccount(account);
+
+        notifyAccountDataChanged();
+    }
+
     public interface AccountListNavigationCallbacks {
         void launchAccountFragment(long accountId, String accountName, int accountPosition);
-        void launchAddEditAccount();
+        void launchAddEditAccount(boolean isEdit, long accountId, int accountPosition);
     }
 }

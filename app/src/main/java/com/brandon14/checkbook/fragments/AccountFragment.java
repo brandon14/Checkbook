@@ -3,7 +3,6 @@ package com.brandon14.checkbook.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -23,14 +22,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.brandon14.checkbook.AddEditAccount;
 import com.brandon14.checkbook.R;
 import com.brandon14.checkbook.adapters.TransactionAdapter;
-import com.brandon14.checkbook.intentkeys.AccountIntentKeys;
 import com.brandon14.checkbook.model.Account;
 import com.brandon14.checkbook.model.Transaction;
 import com.brandon14.checkbook.model.database.Checkbook;
-import com.brandon14.checkbook.requests.ActivityRequests;
 import com.brandon14.checkbook.widgets.ContextMenuRecyclerView;
 
 import java.math.BigDecimal;
@@ -40,7 +36,7 @@ import java.util.ArrayList;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link AccountNavigationCallbacks} interface
+ * {@link OnAccountUpdateCallbacks} interface
  * to handle interaction events.
  * Use the {@link AccountFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -76,7 +72,8 @@ public class AccountFragment extends Fragment {
 
     private Account mAccount;
 
-    private AccountNavigationCallbacks mCallback;
+    private OnAccountUpdateCallbacks mAccountCallback;
+    private AccountNavigationCallbacks mNavigationCallback;
 
     public AccountFragment() {
         // Required empty public constructor
@@ -163,16 +160,26 @@ public class AccountFragment extends Fragment {
         }
 
         Activity activity = getActivity();
-        activity.setTitle(mAccountName);
+
+        if (mAccount != null) {
+            activity.setTitle(mAccount.getAccountName());
+        } else {
+            activity.setTitle(mAccountName);
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
 
-        mRecyclerViewState = mLayoutManager.onSaveInstanceState();
-        state.putParcelable(RECYCLER_VIEW_STATE_KEY, mRecyclerViewState);
-        state.putParcelableArrayList(TRANSACTION_LIST_STATE_KEY, mTransactionList);
+        if (mLayoutManager != null) {
+            mRecyclerViewState = mLayoutManager.onSaveInstanceState();
+            state.putParcelable(RECYCLER_VIEW_STATE_KEY, mRecyclerViewState);
+        }
+
+        if (mTransactionList != null) {
+            state.putParcelableArrayList(TRANSACTION_LIST_STATE_KEY, mTransactionList);
+        }
     }
 
     @Override
@@ -187,15 +194,11 @@ public class AccountFragment extends Fragment {
 
         switch (id) {
             case android.R.id.home:
-                getActivity().onBackPressed();
+                finish();
 
                 return true;
             case R.id.action_account_edit:
-                Intent intent = new Intent(getActivity(), AddEditAccount.class);
-                intent.putExtra(AccountIntentKeys.ARG_IS_EDIT, true);
-                intent.putExtra(AccountIntentKeys.ARG_ACCOUNT_ID, mAccount.getAccountId());
-
-                startActivityForResult(intent, ActivityRequests.ACCOUNT_REQUEST);
+                mNavigationCallback.launchAddEditAccount(true, mAccount.getAccountId(), mAccountPosition);
 
                 return true;
             case R.id.action_account_delete:
@@ -214,7 +217,9 @@ public class AccountFragment extends Fragment {
                                     }
                                 }
 
-                                // Switch back to account list fragment
+                                mAccountCallback.onAccountDeleted(mAccountPosition);
+
+                                finish();
 
                                 break;
 
@@ -239,8 +244,15 @@ public class AccountFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
+        if (context instanceof OnAccountUpdateCallbacks) {
+            mAccountCallback = (OnAccountUpdateCallbacks) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnAccountUpdateCallbacks");
+        }
+
         if (context instanceof AccountNavigationCallbacks) {
-            mCallback = (AccountNavigationCallbacks) context;
+            mNavigationCallback = (AccountNavigationCallbacks) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement AccountNavigationCallbacks");
@@ -251,7 +263,12 @@ public class AccountFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
 
-        mCallback = null;
+        mAccountCallback = null;
+        mNavigationCallback = null;
+    }
+
+    private void finish() {
+        getActivity().onBackPressed();
     }
 
     private void setUpRecyclerView() {
@@ -300,7 +317,12 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    public interface AccountNavigationCallbacks {
+    public interface OnAccountUpdateCallbacks {
+        void onAccountDeleted(int position);
+        void onAccountUpdated(int position, Account account);
+    }
 
+    public interface AccountNavigationCallbacks {
+        void launchAddEditAccount(boolean isEdit, long accountId, int accountPosition);
     }
 }

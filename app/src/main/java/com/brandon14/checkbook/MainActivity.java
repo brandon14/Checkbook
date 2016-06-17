@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 
+import com.brandon14.checkbook.application.IMMLeaks;
 import com.brandon14.checkbook.fragments.AboutFragment;
 import com.brandon14.checkbook.fragments.AccountFragment;
 import com.brandon14.checkbook.fragments.AccountListFragment;
@@ -63,6 +64,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        IMMLeaks.fixFocusedViewLeak(getApplication());
 
         setContentView(R.layout.activity_main);
 

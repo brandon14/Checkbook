@@ -37,6 +37,8 @@
 
     <string name="hint_account_name">Account Name</string>
     <string name="hint_account_balance">Starting Balance</string>
+    <string name="hint_transaction_payee">Payee</string>
+    <string name="hint_transaction_amount">Amount</string>
 
     <string name="str_starting_balance_text">$0.00</string>
     <string name="str_add_account_message">Press + to add account.</string>

@@ -157,10 +157,6 @@ public class NavigationDrawerFragment extends Fragment {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
 
-        // set a custom shadow that overlays the main content when the drawer opens
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        // set up the drawer's list view with items and click listener
-
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.
         mDrawerToggle = new ActionBarDrawerToggle(
@@ -278,10 +274,11 @@ public class NavigationDrawerFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        try {
-            mCallbacks = (NavigationDrawerCallbacks) getActivity();
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
+        if (context instanceof NavigationDrawerCallbacks) {
+            mCallbacks = (NavigationDrawerCallbacks) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement NavigationDrawerCallbacks.");
         }
     }
 

@@ -135,6 +135,12 @@ public class AccountFragment extends Fragment {
         mAccount = Checkbook.getInstance(getContext()).getAccount(mAccountId);
 
         mAddFAB = (FloatingActionButton) rootView.findViewById(R.id.fab_add_transactions);
+        mAddFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mNavigationCallback.launchAddEditTransaction(false, -1, -1, -1);
+            }
+        });
 
         mAccountBalanceTextView = (TextView) rootView.findViewById(R.id.text_view_account_balance);
         mAddTransactionMessage = (TextView) rootView.findViewById(R.id.textview_add_transaction_message);
@@ -317,12 +323,24 @@ public class AccountFragment extends Fragment {
         }
     }
 
+    public void onTransactionAdded(Transaction transaction) {
+
+    }
+
+    public void onTransactionUpdated(int position, Transaction transaction) {
+
+    }
+
+    public void onTransactionDeleted(int position) {
+
+    }
+
     public interface OnAccountUpdateCallbacks {
         void onAccountDeleted(int position);
-        void onAccountUpdated(int position, Account account);
     }
 
     public interface AccountNavigationCallbacks {
         void launchAddEditAccount(boolean isEdit, long accountId, int accountPosition);
+        void launchAddEditTransaction(boolean isEdit, long accountId, long transactionId, int transactionPosition);
     }
 }

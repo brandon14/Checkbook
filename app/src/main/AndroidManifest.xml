@@ -20,14 +20,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".AddEditTransaction"
-            android:label="@string/title_add_transaction">
-        </activity>
-        <activity
-            android:name=".AddEditTransfer"
-            android:label="@string/title_add_transfer">
-        </activity>
     </application>
 
 </manifest>

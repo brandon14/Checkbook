@@ -19,12 +19,14 @@ import com.brandon14.checkbook.fragments.AboutFragment;
 import com.brandon14.checkbook.fragments.AccountFragment;
 import com.brandon14.checkbook.fragments.AccountListFragment;
 import com.brandon14.checkbook.fragments.AddEditAccountFragment;
+import com.brandon14.checkbook.fragments.AddEditTransactionFragment;
 import com.brandon14.checkbook.fragments.HelpFragment;
 import com.brandon14.checkbook.fragments.NavigationDrawerFragment;
 import com.brandon14.checkbook.fragments.RecurringFragment;
 import com.brandon14.checkbook.fragments.ReportsFragment;
 import com.brandon14.checkbook.fragments.SettingsFragment;
 import com.brandon14.checkbook.model.Account;
+import com.brandon14.checkbook.model.Transaction;
 
 /**
  *
@@ -35,12 +37,10 @@ public class MainActivity extends AppCompatActivity
         AccountFragment.OnAccountUpdateCallbacks,
         AccountFragment.AccountNavigationCallbacks,
         AddEditAccountFragment.OnAccountAddEditCallbacks,
+        AddEditTransactionFragment.OnTransactionAddEditCallbacks,
         SettingsFragment.OnSettingsFragmentInteractionListener {
     private static final String LOG_TAG = "MainActivity";
     private static final int BACK_PRESS_TIME = 2000;
-
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-    private Toolbar mToolbar;
 
     private static boolean sDoubleBackToExitPressedOnce = false;
 
@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity
             super();
         }
     }
-
     private static final Runnable sBackPressRunnable = new Runnable() {
         @Override
         public void run() {
@@ -58,6 +57,9 @@ public class MainActivity extends AppCompatActivity
     };
 
     private final BackPressHandler mBackPressHandler = new BackPressHandler();
+
+    private NavigationDrawerFragment mNavigationDrawerFragment;
+    private Toolbar mToolbar;
 
     private CharSequence mTitle;
 
@@ -197,16 +199,16 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        // If we have already pressed back once, then we can exit as normal.
-        if (sDoubleBackToExitPressedOnce) {
-            super.onBackPressed();
+        // If the drawer is open we need to close it and return.
+        if (mNavigationDrawerFragment.isDrawerOpen()) {
+            mNavigationDrawerFragment.closeDrawer();
 
             return;
         }
 
-        // If the drawer is open we need to close it and return.
-        if (mNavigationDrawerFragment.isDrawerOpen()) {
-            mNavigationDrawerFragment.closeDrawer();
+        // If we have already pressed back once, then we can exit as normal.
+        if (sDoubleBackToExitPressedOnce) {
+            super.onBackPressed();
 
             return;
         }
@@ -311,6 +313,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void launchAddEditTransaction(boolean isEdit, long accountId, long transactionId, int transactionPosition) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        mNavigationDrawerFragment.toggleHomeIndicator(false);
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, AddEditTransactionFragment.newInstance(isEdit, accountId, transactionId, transactionPosition), AddEditTransactionFragment.class.getSimpleName())
+                .addToBackStack(AddEditTransactionFragment.class.getSimpleName())
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .commit();
+    }
+
+    @Override
     public void onAccountDeleted(int position) {
         FragmentManager fragmentManager = getSupportFragmentManager();
 
@@ -347,5 +362,15 @@ public class MainActivity extends AppCompatActivity
         } else {
             Log.e(LOG_TAG, "AccountListFragment was not found!");
         }
+    }
+
+    @Override
+    public void onTransactionAdded(Transaction transaction) {
+
+    }
+
+    @Override
+    public void onTransactionUpdated(int position, Transaction transaction) {
+
     }
 }

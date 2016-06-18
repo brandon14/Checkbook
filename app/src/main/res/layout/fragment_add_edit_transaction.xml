@@ -3,9 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:id="@+id/layout_add_edit_account_coordinator"
-    tools:context="com.brandon14.checkbook.fragments.AddEditAccountFragment" >
+    android:id="@+id/layout_add_edit_transaction_coordinator"
+    tools:context="com.brandon14.checkbook.fragments.AddEditTransactionFragment" >
 
     <LinearLayout
         android:orientation="vertical"
@@ -15,11 +14,10 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:id="@+id/add_edit_account_container">
-
+        android:id="@+id/add_edit_transaction_container">
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/input_account_name"
+            android:id="@+id/input_transaction_payee"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -27,10 +25,40 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords"
-                android:id="@+id/edit_text_account_name"
-                android:hint="@string/hint_account_name" />
+                android:id="@+id/edit_text_transaction_payee"
+                android:hint="@string/hint_transaction_payee" />
 
         </android.support.design.widget.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/spinner_from_account"
+                android:spinnerMode="dropdown" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/spinner_to_account"
+                android:spinnerMode="dropdown" />
+
+        </LinearLayout>
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -40,41 +68,18 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
-                android:id="@+id/edit_text_account_balance"
+                android:id="@+id/edit_text_transaction_amount"
                 android:textCursorDrawable="@drawable/empty_shape"
                 android:textSelectHandleLeft="@drawable/empty_shape"
                 android:textSelectHandleRight="@drawable/empty_shape"
                 android:textSelectHandle="@drawable/empty_shape"
                 android:longClickable="false"
-                android:hint="@string/hint_account_balance"
+                android:hint="@string/hint_transaction_amount"
                 android:textIsSelectable="false"
                 android:contextClickable="false" />
 
         </android.support.design.widget.TextInputLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/label_date_created"
-                android:id="@+id/textview_label_date_created"
-                android:layout_marginTop="@dimen/label_top_margin" />
-
-            <Button
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/btn_date_created_spinner"
-                android:layout_marginLeft="@dimen/margin_between_elements"
-                android:layout_marginStart="@dimen/margin_between_elements" />
-
-        </LinearLayout>
-
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>
-
